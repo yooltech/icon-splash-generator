@@ -53,6 +53,13 @@ export interface IconConfig {
   hasBadge: boolean;
   badgeColor: string;
   filename: string;
+  // Adaptive icon support
+  useAdaptiveIcon: boolean;
+  adaptiveForeground: string | null;
+  adaptiveBackground: string | null;
+  adaptiveBackgroundType: 'color' | 'gradient' | 'image';
+  adaptiveBackgroundColor: string;
+  adaptiveBackgroundGradient: GradientConfig;
 }
 
 export interface SplashConfig {
@@ -125,6 +132,15 @@ export const DEFAULT_ICON_CONFIG: IconConfig = {
   hasBadge: false,
   badgeColor: '#EF4444',
   filename: 'ic_launcher',
+  useAdaptiveIcon: false,
+  adaptiveForeground: null,
+  adaptiveBackground: null,
+  adaptiveBackgroundType: 'color',
+  adaptiveBackgroundColor: '#3B82F6',
+  adaptiveBackgroundGradient: {
+    colors: ['#3B82F6', '#8B5CF6'],
+    direction: 'to-br',
+  },
 };
 
 export const DEFAULT_SPLASH_CONFIG: SplashConfig = {

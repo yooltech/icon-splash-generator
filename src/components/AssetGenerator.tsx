@@ -13,6 +13,7 @@ import {
   Apple
 } from 'lucide-react';
 import { StepIndicator } from '@/components/StepIndicator';
+import { HeroSection } from '@/components/HeroSection';
 import { IconDesigner } from '@/components/icon-designer';
 import { SplashDesigner } from '@/components/splash-designer';
 import { SuccessScreen } from '@/components/SuccessScreen';
@@ -38,6 +39,7 @@ const frameworkOptions: { id: Framework; label: string }[] = [
 ];
 
 export function AssetGenerator() {
+  const [showHero, setShowHero] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [platforms, setPlatforms] = useState<Platform[]>(['android', 'ios']);
   const [framework, setFramework] = useState<Framework>('capacitor');
@@ -46,6 +48,10 @@ export function AssetGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, phase: '' });
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([]);
+
+  const handleGetStarted = useCallback(() => {
+    setShowHero(false);
+  }, []);
 
   const handleNext = useCallback(async () => {
     if (currentStep === 2) {
@@ -85,8 +91,12 @@ export function AssetGenerator() {
   }, [currentStep, iconConfig, splashConfig, platforms]);
 
   const handleBack = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
-  }, []);
+    if (currentStep === 0) {
+      setShowHero(true);
+    } else {
+      setCurrentStep((prev) => Math.max(prev - 1, 0));
+    }
+  }, [currentStep]);
 
   const handleReset = useCallback(() => {
     setCurrentStep(0);
@@ -103,17 +113,42 @@ export function AssetGenerator() {
     }
   };
 
+  // Show hero section
+  if (showHero) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="border-b border-border py-4 px-6">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-primary" />
+              <h1 className="text-xl font-bold">
+                <span className="text-gradient">App Asset</span> Generator
+              </h1>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleGetStarted}>
+              Skip to Generator
+            </Button>
+          </div>
+        </header>
+        <HeroSection onGetStarted={handleGetStarted} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border py-4 px-6">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowHero(true)}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <Sparkles className="w-6 h-6 text-primary" />
             <h1 className="text-xl font-bold">
               <span className="text-gradient">App Asset</span> Generator
             </h1>
-          </div>
+          </button>
           <span className="text-xs text-muted-foreground">Android & iOS</span>
         </div>
       </header>
@@ -277,6 +312,9 @@ export function AssetGenerator() {
                         <p>Shape: {iconConfig.shape}</p>
                         <p>Background: {iconConfig.backgroundType}</p>
                         <p>Filename: {iconConfig.filename}.png</p>
+                        {iconConfig.useAdaptiveIcon && (
+                          <p className="text-primary">+ Adaptive Icon</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -361,7 +399,6 @@ export function AssetGenerator() {
             <Button
               variant="ghost"
               onClick={handleBack}
-              disabled={currentStep === 0}
               className="gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
