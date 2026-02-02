@@ -19,6 +19,7 @@ import { SplashDesigner } from '@/components/splash-designer';
 import { SuccessScreen } from '@/components/SuccessScreen';
 import { AndroidStudioOptions } from '@/components/AndroidStudioOptions';
 import { Footer } from '@/components/Footer';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { generateAllIcons, generateAllSplashScreens } from '@/lib/imageProcessor';
 import { 
@@ -136,9 +137,12 @@ export function AssetGenerator() {
                 <span className="text-gradient">Splash</span>Craft
               </h1>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleGetStarted}>
-              Skip to Generator
-            </Button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button variant="ghost" size="sm" onClick={handleGetStarted}>
+                Skip to Generator
+              </Button>
+            </div>
           </div>
         </header>
         <HeroSection onGetStarted={handleGetStarted} />
@@ -161,7 +165,10 @@ export function AssetGenerator() {
               <span className="text-gradient">Splash</span>Craft
             </h1>
           </button>
-          <span className="text-xs text-muted-foreground">Android & iOS</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground hidden sm:inline">Android & iOS</span>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

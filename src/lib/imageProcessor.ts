@@ -11,6 +11,7 @@ import {
   type SplashConfig,
   type AndroidStudioOptions,
 } from '@/types/assets';
+import { generateAppIconContentsJson, generateSplashContentsJson } from './iosContentsJson';
 
 export async function generateIconFromConfig(
   config: IconConfig,
@@ -507,6 +508,17 @@ export async function generateAllIcons(
     }
   }
 
+  // Generate iOS Contents.json
+  if (platforms.includes('ios')) {
+    const contentsJson = generateAppIconContentsJson(config.filename || 'AppIcon');
+    const jsonBlob = new Blob([contentsJson], { type: 'application/json' });
+    assets.push({
+      name: 'Contents.json',
+      path: 'ios/icons/AppIcon.appiconset/Contents.json',
+      blob: jsonBlob,
+    });
+  }
+
   return assets;
 }
 
@@ -609,6 +621,17 @@ export async function generateAllSplashScreens(
     
     currentAsset += 2;
     onProgress(currentAsset, totalAssets);
+  }
+
+  // Generate iOS splash Contents.json
+  if (platforms.includes('ios')) {
+    const contentsJson = generateSplashContentsJson();
+    const jsonBlob = new Blob([contentsJson], { type: 'application/json' });
+    assets.push({
+      name: 'Contents.json',
+      path: 'ios/splash/LaunchImage.launchimage/Contents.json',
+      blob: jsonBlob,
+    });
   }
 
   return assets;
