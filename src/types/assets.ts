@@ -95,6 +95,7 @@ export interface AndroidStudioOptions {
   enabled: boolean;
   generateRoundIcon: boolean;
   generateForeground: boolean;
+  generateMonochrome: boolean;
   generateAdaptiveXml: boolean;
   generateSplashXml: boolean;
 }
@@ -103,9 +104,87 @@ export const DEFAULT_ANDROID_STUDIO_OPTIONS: AndroidStudioOptions = {
   enabled: false,
   generateRoundIcon: true,
   generateForeground: true,
+  generateMonochrome: true,
   generateAdaptiveXml: true,
   generateSplashXml: true,
 };
+
+export interface ExtendedIconOptions {
+  macOS: boolean;
+  web: boolean;
+  tvOS: boolean;
+  androidTV: boolean;
+  playStore: boolean;
+}
+
+export const DEFAULT_EXTENDED_ICON_OPTIONS: ExtendedIconOptions = {
+  macOS: false,
+  web: false,
+  tvOS: false,
+  androidTV: false,
+  playStore: false,
+};
+
+// macOS icon sizes (for .icns generation)
+export const MACOS_ICON_SIZES: IconSize[] = [
+  { name: 'icon_16x16', size: 16, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_16x16@2x', size: 32, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_32x32', size: 32, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_32x32@2x', size: 64, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_128x128', size: 128, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_128x128@2x', size: 256, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_256x256', size: 256, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_256x256@2x', size: 512, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_512x512', size: 512, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'icon_512x512@2x', size: 1024, folder: 'macos/AppIcon.appiconset', platform: 'ios' },
+];
+
+// Web/PWA icon sizes
+export const WEB_ICON_SIZES: IconSize[] = [
+  { name: 'favicon-16x16', size: 16, folder: 'web', platform: 'ios' },
+  { name: 'favicon-32x32', size: 32, folder: 'web', platform: 'ios' },
+  { name: 'favicon-48x48', size: 48, folder: 'web', platform: 'ios' },
+  { name: 'apple-touch-icon', size: 180, folder: 'web', platform: 'ios' },
+  { name: 'icon-192x192', size: 192, folder: 'web', platform: 'ios' },
+  { name: 'icon-512x512', size: 512, folder: 'web', platform: 'ios' },
+  { name: 'maskable-icon-192', size: 192, folder: 'web', platform: 'ios' },
+  { name: 'maskable-icon-512', size: 512, folder: 'web', platform: 'ios' },
+];
+
+// tvOS icon sizes
+export const TVOS_ICON_SIZES: IconSize[] = [
+  { name: 'App Icon - App Store 1x', size: 1280, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets', platform: 'ios' },
+  { name: 'App Icon - Small 1x', size: 400, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets', platform: 'ios' },
+  { name: 'App Icon - Small 2x', size: 800, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets', platform: 'ios' },
+];
+
+// tvOS Top Shelf sizes (these are banners, not square icons)
+export interface BannerSize {
+  name: string;
+  width: number;
+  height: number;
+  folder: string;
+}
+
+export const TVOS_TOP_SHELF_SIZES: BannerSize[] = [
+  { name: 'Top Shelf Image 1x', width: 1920, height: 720, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets' },
+  { name: 'Top Shelf Image 2x', width: 3840, height: 1440, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets' },
+  { name: 'Top Shelf Wide 1x', width: 2320, height: 720, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets' },
+  { name: 'Top Shelf Wide 2x', width: 4640, height: 1440, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets' },
+];
+
+// Android TV banner sizes
+export const ANDROID_TV_BANNER_SIZES: BannerSize[] = [
+  { name: 'banner-xhdpi', width: 320, height: 180, folder: 'android-tv/drawable-xhdpi' },
+  { name: 'banner-xxhdpi', width: 480, height: 270, folder: 'android-tv/drawable-xxhdpi' },
+  { name: 'banner-xxxhdpi', width: 640, height: 360, folder: 'android-tv/drawable-xxxhdpi' },
+];
+
+// Play Store assets
+export const PLAY_STORE_SIZES: BannerSize[] = [
+  { name: 'feature-graphic', width: 1024, height: 500, folder: 'play-store' },
+  { name: 'hi-res-icon', width: 512, height: 512, folder: 'play-store' },
+];
 
 export interface AssetConfig {
   platforms: Platform[];

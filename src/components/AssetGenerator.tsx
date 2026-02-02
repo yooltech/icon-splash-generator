@@ -18,6 +18,7 @@ import { IconDesigner } from '@/components/icon-designer';
 import { SplashDesigner } from '@/components/splash-designer';
 import { SuccessScreen } from '@/components/SuccessScreen';
 import { AndroidStudioOptions } from '@/components/AndroidStudioOptions';
+import { ExtendedIconOptions } from '@/components/ExtendedIconOptions';
 import { Footer } from '@/components/Footer';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
@@ -29,9 +30,11 @@ import {
   type SplashConfig,
   type GeneratedAsset,
   type AndroidStudioOptions as AndroidStudioOptionsType,
+  type ExtendedIconOptions as ExtendedIconOptionsType,
   DEFAULT_ICON_CONFIG,
   DEFAULT_SPLASH_CONFIG,
   DEFAULT_ANDROID_STUDIO_OPTIONS,
+  DEFAULT_EXTENDED_ICON_OPTIONS,
 } from '@/types/assets';
 
 const STEPS = ['Icon', 'Splash', 'Preview', 'Generate'];
@@ -51,6 +54,7 @@ export function AssetGenerator() {
   const [iconConfig, setIconConfig] = useState<IconConfig>(DEFAULT_ICON_CONFIG);
   const [splashConfig, setSplashConfig] = useState<SplashConfig>(DEFAULT_SPLASH_CONFIG);
   const [androidStudioOptions, setAndroidStudioOptions] = useState<AndroidStudioOptionsType>(DEFAULT_ANDROID_STUDIO_OPTIONS);
+  const [extendedIconOptions, setExtendedIconOptions] = useState<ExtendedIconOptionsType>(DEFAULT_EXTENDED_ICON_OPTIONS);
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, phase: '' });
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([]);
@@ -74,7 +78,8 @@ export function AssetGenerator() {
           (current, total) => {
             setProgress({ current, total, phase: 'Generating icons...' });
           },
-          androidStudioOptions
+          androidStudioOptions,
+          extendedIconOptions
         );
         allAssets.push(...icons);
 
@@ -100,7 +105,7 @@ export function AssetGenerator() {
     } else {
       setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
     }
-  }, [currentStep, iconConfig, splashConfig, platforms, androidStudioOptions]);
+  }, [currentStep, iconConfig, splashConfig, platforms, androidStudioOptions, extendedIconOptions]);
 
   const handleBack = useCallback(() => {
     if (currentStep === 0) {
@@ -314,6 +319,12 @@ export function AssetGenerator() {
                   options={androidStudioOptions}
                   onChange={setAndroidStudioOptions}
                   hasAndroid={platforms.includes('android')}
+                />
+
+                {/* Extended Icon Options */}
+                <ExtendedIconOptions
+                  options={extendedIconOptions}
+                  onChange={setExtendedIconOptions}
                 />
 
                 {/* Preview Summary */}

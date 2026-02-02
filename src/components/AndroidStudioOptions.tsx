@@ -131,6 +131,19 @@ export function AndroidStudioOptions({
 
                 <div className="flex items-center gap-3">
                   <Checkbox
+                    id="generate-monochrome"
+                    checked={options.generateMonochrome}
+                    onCheckedChange={(checked) =>
+                      onChange({ ...options, generateMonochrome: checked === true })
+                    }
+                  />
+                  <Label htmlFor="generate-monochrome" className="text-sm cursor-pointer">
+                    Generate ic_launcher_monochrome.png (Material You)
+                  </Label>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Checkbox
                     id="generate-adaptive-xml"
                     checked={options.generateAdaptiveXml}
                     onCheckedChange={(checked) =>
