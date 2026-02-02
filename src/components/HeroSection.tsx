@@ -87,15 +87,15 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Generate{' '}
-              <span className="text-gradient">App Icons</span>{' '}
-              &{' '}
-              <span className="text-gradient">Splash Screens</span>
+              <span className="text-gradient">SplashCraft</span>
+              <span className="block text-2xl md:text-3xl lg:text-4xl mt-2 font-semibold text-muted-foreground">
+                App Icons & Splash Screens
+              </span>
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8 max-w-lg">
-              Design beautiful app icons and splash screens, then export all required sizes 
-              for Android and iOS in one click. Works entirely in your browser.
+              Generate professional Android and iOS app icons and splash screens from one design.
+              Works entirely in your browser — no sign-up required.
             </p>
 
             <div className="flex flex-wrap gap-4">

@@ -132,7 +132,7 @@ export function AssetGenerator() {
             <div className="flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-primary" />
               <h1 className="text-xl font-bold">
-                <span className="text-gradient">App Asset</span> Generator
+                <span className="text-gradient">Splash</span>Craft
               </h1>
             </div>
             <Button variant="ghost" size="sm" onClick={handleGetStarted}>
@@ -156,7 +156,7 @@ export function AssetGenerator() {
           >
             <Sparkles className="w-6 h-6 text-primary" />
             <h1 className="text-xl font-bold">
-              <span className="text-gradient">App Asset</span> Generator
+              <span className="text-gradient">Splash</span>Craft
             </h1>
           </button>
           <span className="text-xs text-muted-foreground">Android & iOS</span>
