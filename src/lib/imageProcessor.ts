@@ -5,11 +5,18 @@ import {
   IOS_SPLASH_SIZES,
   ANDROID_STUDIO_ICON_SIZES,
   ANDROID_STUDIO_SPLASH_SIZES,
+  MACOS_ICON_SIZES,
+  WEB_ICON_SIZES,
+  TVOS_ICON_SIZES,
+  TVOS_TOP_SHELF_SIZES,
+  ANDROID_TV_BANNER_SIZES,
+  PLAY_STORE_SIZES,
   type Platform,
   type GeneratedAsset,
   type IconConfig,
   type SplashConfig,
   type AndroidStudioOptions,
+  type ExtendedIconOptions,
 } from '@/types/assets';
 import { generateAppIconContentsJson, generateSplashContentsJson } from './iosContentsJson';
 
@@ -402,7 +409,8 @@ export async function generateAllIcons(
   config: IconConfig,
   platforms: Platform[],
   onProgress: (current: number, total: number) => void,
-  androidStudioOptions?: AndroidStudioOptions
+  androidStudioOptions?: AndroidStudioOptions,
+  extendedIconOptions?: ExtendedIconOptions
 ): Promise<GeneratedAsset[]> {
   const assets: GeneratedAsset[] = [];
   const useAndroidStudio = androidStudioOptions?.enabled && platforms.includes('android');
@@ -418,8 +426,16 @@ export async function generateAllIcons(
   if (useAndroidStudio) {
     if (androidStudioOptions.generateRoundIcon) totalAssets += ANDROID_STUDIO_ICON_SIZES.length;
     if (androidStudioOptions.generateForeground) totalAssets += ANDROID_STUDIO_ICON_SIZES.length;
+    if (androidStudioOptions.generateMonochrome) totalAssets += ANDROID_STUDIO_ICON_SIZES.length;
     if (androidStudioOptions.generateAdaptiveXml) totalAssets += 1;
   }
+  
+  // Extended icon counts
+  if (extendedIconOptions?.macOS) totalAssets += MACOS_ICON_SIZES.length + 1; // +1 for Contents.json
+  if (extendedIconOptions?.web) totalAssets += WEB_ICON_SIZES.length + 1; // +1 for manifest
+  if (extendedIconOptions?.tvOS) totalAssets += TVOS_ICON_SIZES.length + TVOS_TOP_SHELF_SIZES.length;
+  if (extendedIconOptions?.androidTV) totalAssets += ANDROID_TV_BANNER_SIZES.length;
+  if (extendedIconOptions?.playStore) totalAssets += PLAY_STORE_SIZES.length;
 
   let currentAsset = 0;
 
@@ -484,9 +500,23 @@ export async function generateAllIcons(
       }
     }
 
+    // Monochrome icons (for Material You theming)
+    if (androidStudioOptions.generateMonochrome) {
+      for (const sizeConfig of ANDROID_STUDIO_ICON_SIZES) {
+        const blob = await generateMonochromeIcon(config, sizeConfig.size);
+        assets.push({
+          name: `${config.filename || 'ic_launcher'}_monochrome.png`,
+          path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}_monochrome.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+    }
+
     // Adaptive icon XML
     if (androidStudioOptions.generateAdaptiveXml) {
-      const adaptiveXml = generateAdaptiveIconXml(config);
+      const adaptiveXml = generateAdaptiveIconXml(config, false, androidStudioOptions.generateMonochrome);
       const xmlBlob = new Blob([adaptiveXml], { type: 'application/xml' });
       assets.push({
         name: 'ic_launcher.xml',
@@ -495,7 +525,7 @@ export async function generateAllIcons(
       });
       
       // Also add round adaptive icon XML
-      const adaptiveRoundXml = generateAdaptiveIconXml(config, true);
+      const adaptiveRoundXml = generateAdaptiveIconXml(config, true, androidStudioOptions.generateMonochrome);
       const xmlRoundBlob = new Blob([adaptiveRoundXml], { type: 'application/xml' });
       assets.push({
         name: 'ic_launcher_round.xml',
@@ -505,6 +535,120 @@ export async function generateAllIcons(
       
       currentAsset++;
       onProgress(currentAsset, totalAssets);
+    }
+  }
+
+  // Generate extended icon formats
+  if (extendedIconOptions) {
+    // macOS icons
+    if (extendedIconOptions.macOS) {
+      for (const sizeConfig of MACOS_ICON_SIZES) {
+        const macConfig = { ...config, shape: 'squircle' as const };
+        const blob = await generateIconFromConfig(macConfig, sizeConfig.size);
+        assets.push({
+          name: `${sizeConfig.name}.png`,
+          path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+      // Add macOS Contents.json
+      const macContentsJson = generateMacOSContentsJson();
+      assets.push({
+        name: 'Contents.json',
+        path: 'macos/AppIcon.appiconset/Contents.json',
+        blob: new Blob([macContentsJson], { type: 'application/json' }),
+      });
+      currentAsset++;
+      onProgress(currentAsset, totalAssets);
+    }
+
+    // Web/PWA icons
+    if (extendedIconOptions.web) {
+      for (const sizeConfig of WEB_ICON_SIZES) {
+        const blob = await generateIconFromConfig(config, sizeConfig.size);
+        assets.push({
+          name: `${sizeConfig.name}.png`,
+          path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+      // Add web manifest
+      const webManifest = generateWebManifest();
+      assets.push({
+        name: 'site.webmanifest',
+        path: 'web/site.webmanifest',
+        blob: new Blob([webManifest], { type: 'application/json' }),
+      });
+      currentAsset++;
+      onProgress(currentAsset, totalAssets);
+    }
+
+    // tvOS icons
+    if (extendedIconOptions.tvOS) {
+      for (const sizeConfig of TVOS_ICON_SIZES) {
+        const blob = await generateIconFromConfig(config, sizeConfig.size);
+        assets.push({
+          name: `${sizeConfig.name}.png`,
+          path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+      // tvOS Top Shelf banners
+      for (const bannerSize of TVOS_TOP_SHELF_SIZES) {
+        const blob = await generateBannerFromIcon(config, bannerSize.width, bannerSize.height);
+        assets.push({
+          name: `${bannerSize.name}.png`,
+          path: `${bannerSize.folder}/${bannerSize.name}.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+    }
+
+    // Android TV banners
+    if (extendedIconOptions.androidTV) {
+      for (const bannerSize of ANDROID_TV_BANNER_SIZES) {
+        const blob = await generateBannerFromIcon(config, bannerSize.width, bannerSize.height);
+        assets.push({
+          name: `banner.png`,
+          path: `${bannerSize.folder}/banner.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+    }
+
+    // Play Store assets
+    if (extendedIconOptions.playStore) {
+      for (const bannerSize of PLAY_STORE_SIZES) {
+        if (bannerSize.width === bannerSize.height) {
+          // Square icon
+          const blob = await generateIconFromConfig(config, bannerSize.width);
+          assets.push({
+            name: `${bannerSize.name}.png`,
+            path: `${bannerSize.folder}/${bannerSize.name}.png`,
+            blob,
+          });
+        } else {
+          // Feature graphic
+          const blob = await generateBannerFromIcon(config, bannerSize.width, bannerSize.height);
+          assets.push({
+            name: `${bannerSize.name}.png`,
+            path: `${bannerSize.folder}/${bannerSize.name}.png`,
+            blob,
+          });
+        }
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
     }
   }
 
@@ -522,14 +666,174 @@ export async function generateAllIcons(
   return assets;
 }
 
-function generateAdaptiveIconXml(config: IconConfig, isRound = false): string {
+function generateAdaptiveIconXml(config: IconConfig, isRound = false, includeMonochrome = false): string {
   const filename = config.filename || 'ic_launcher';
   return `<?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background"/>
     <foreground android:drawable="@mipmap/${filename}_foreground"/>
-    ${isRound ? '<monochrome android:drawable="@mipmap/' + filename + '_foreground"/>' : ''}
+    ${includeMonochrome ? `<monochrome android:drawable="@mipmap/${filename}_monochrome"/>` : ''}
 </adaptive-icon>`;
+}
+
+async function generateMonochromeIcon(config: IconConfig, targetSize: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = targetSize;
+    canvas.height = targetSize;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+
+    // Transparent background for monochrome icons
+    ctx.clearRect(0, 0, targetSize, targetSize);
+
+    // Draw content in white (will be tinted by system)
+    const padding = config.effect === 'padding' ? config.paddingPercent / 100 : 0.15;
+    const contentSize = targetSize * (1 - padding * 2);
+    const offset = targetSize * padding;
+
+    ctx.save();
+    ctx.translate(offset, offset);
+    ctx.fillStyle = '#FFFFFF';
+
+    switch (config.sourceType) {
+      case 'text':
+        ctx.font = `bold ${contentSize * 0.6}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(config.sourceValue, contentSize / 2, contentSize / 2);
+        break;
+      case 'clipart':
+        ctx.font = `${contentSize * 0.6}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(config.sourceValue, contentSize / 2, contentSize / 2);
+        break;
+      default:
+        ctx.font = `${contentSize * 0.5}px Inter`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✦', contentSize / 2, contentSize / 2);
+    }
+
+    ctx.restore();
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Could not create blob'));
+        }
+      },
+      'image/png',
+      1.0
+    );
+  });
+}
+
+async function generateBannerFromIcon(config: IconConfig, width: number, height: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+
+    // Draw background
+    switch (config.backgroundType) {
+      case 'gradient': {
+        const gradient = ctx.createLinearGradient(0, 0, width, 0);
+        config.gradient.colors.forEach((color, i) => {
+          gradient.addColorStop(i / (config.gradient.colors.length - 1), color);
+        });
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        break;
+      }
+      default:
+        ctx.fillStyle = config.backgroundColor;
+        ctx.fillRect(0, 0, width, height);
+    }
+
+    // Draw icon in center
+    const iconSize = Math.min(width, height) * 0.6;
+    const iconX = (width - iconSize) / 2;
+    const iconY = (height - iconSize) / 2;
+
+    ctx.save();
+    ctx.translate(iconX, iconY);
+    ctx.fillStyle = '#FFFFFF';
+
+    switch (config.sourceType) {
+      case 'text':
+        ctx.font = `bold ${iconSize * 0.5}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(config.sourceValue, iconSize / 2, iconSize / 2);
+        break;
+      case 'clipart':
+        ctx.font = `${iconSize * 0.5}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(config.sourceValue, iconSize / 2, iconSize / 2);
+        break;
+      default:
+        ctx.font = `${iconSize * 0.4}px Inter`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✦', iconSize / 2, iconSize / 2);
+    }
+
+    ctx.restore();
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Could not create blob'));
+        }
+      },
+      'image/png',
+      1.0
+    );
+  });
+}
+
+function generateMacOSContentsJson(): string {
+  const images = MACOS_ICON_SIZES.map((size) => ({
+    filename: `${size.name}.png`,
+    idiom: 'mac',
+    scale: size.name.includes('@2x') ? '2x' : '1x',
+    size: `${size.name.includes('@2x') ? size.size / 2 : size.size}x${size.name.includes('@2x') ? size.size / 2 : size.size}`,
+  }));
+
+  return JSON.stringify({ images, info: { author: 'SplashCraft', version: 1 } }, null, 2);
+}
+
+function generateWebManifest(): string {
+  return JSON.stringify({
+    name: 'My App',
+    short_name: 'App',
+    icons: [
+      { src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      { src: 'maskable-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+      { src: 'maskable-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+    theme_color: '#3B82F6',
+    background_color: '#ffffff',
+    display: 'standalone',
+  }, null, 2);
 }
 
 function generateLaunchBackgroundXml(backgroundColor: string): string {
