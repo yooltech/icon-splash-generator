@@ -436,6 +436,9 @@ export async function generateAllIcons(
   if (extendedIconOptions?.tvOS) totalAssets += TVOS_ICON_SIZES.length + TVOS_TOP_SHELF_SIZES.length;
   if (extendedIconOptions?.androidTV) totalAssets += ANDROID_TV_BANNER_SIZES.length;
   if (extendedIconOptions?.playStore) totalAssets += PLAY_STORE_SIZES.length;
+  if (extendedIconOptions?.customSizes) {
+    totalAssets += extendedIconOptions.customSizes.filter(s => s.enabled).length;
+  }
 
   let currentAsset = 0;
 
@@ -576,8 +579,11 @@ export async function generateAllIcons(
         currentAsset++;
         onProgress(currentAsset, totalAssets);
       }
-      // Add web manifest
-      const webManifest = generateWebManifest();
+      // Add web manifest with customization
+      const webManifest = generateWebManifest(
+        extendedIconOptions.webAppName || 'My App',
+        extendedIconOptions.webThemeColor || '#3B82F6'
+      );
       assets.push({
         name: 'site.webmanifest',
         path: 'web/site.webmanifest',
@@ -638,11 +644,41 @@ export async function generateAllIcons(
             blob,
           });
         } else {
-          // Feature graphic
-          const blob = await generateBannerFromIcon(config, bannerSize.width, bannerSize.height);
+          // Feature graphic with app name
+          const blob = await generateFeatureGraphic(
+            config,
+            bannerSize.width,
+            bannerSize.height,
+            extendedIconOptions.playStoreAppName || 'My App'
+          );
           assets.push({
             name: `${bannerSize.name}.png`,
             path: `${bannerSize.folder}/${bannerSize.name}.png`,
+            blob,
+          });
+        }
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+    }
+
+    // Custom sizes
+    if (extendedIconOptions.customSizes) {
+      for (const customSize of extendedIconOptions.customSizes.filter(s => s.enabled)) {
+        if (customSize.width === customSize.height) {
+          // Square icon
+          const blob = await generateIconFromConfig(config, customSize.width);
+          assets.push({
+            name: `${customSize.name}.png`,
+            path: `custom/${customSize.name}.png`,
+            blob,
+          });
+        } else {
+          // Banner/rectangle
+          const blob = await generateBannerFromIcon(config, customSize.width, customSize.height);
+          assets.push({
+            name: `${customSize.name}.png`,
+            path: `custom/${customSize.name}.png`,
             blob,
           });
         }
@@ -820,20 +856,104 @@ function generateMacOSContentsJson(): string {
   return JSON.stringify({ images, info: { author: 'SplashCraft', version: 1 } }, null, 2);
 }
 
-function generateWebManifest(): string {
+function generateWebManifest(appName: string = 'My App', themeColor: string = '#3B82F6'): string {
   return JSON.stringify({
-    name: 'My App',
-    short_name: 'App',
+    name: appName,
+    short_name: appName.length > 12 ? appName.substring(0, 12) : appName,
     icons: [
       { src: 'icon-192x192.png', sizes: '192x192', type: 'image/png' },
       { src: 'icon-512x512.png', sizes: '512x512', type: 'image/png' },
       { src: 'maskable-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
       { src: 'maskable-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
-    theme_color: '#3B82F6',
+    theme_color: themeColor,
     background_color: '#ffffff',
     display: 'standalone',
   }, null, 2);
+}
+
+async function generateFeatureGraphic(
+  config: IconConfig,
+  width: number,
+  height: number,
+  appName: string
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+
+    // Draw background
+    switch (config.backgroundType) {
+      case 'gradient': {
+        const gradient = ctx.createLinearGradient(0, 0, width, 0);
+        config.gradient.colors.forEach((color, i) => {
+          gradient.addColorStop(i / (config.gradient.colors.length - 1), color);
+        });
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        break;
+      }
+      default:
+        ctx.fillStyle = config.backgroundColor;
+        ctx.fillRect(0, 0, width, height);
+    }
+
+    // Draw icon on the left side
+    const iconSize = height * 0.5;
+    const iconX = width * 0.15;
+    const iconY = (height - iconSize) / 2;
+
+    ctx.save();
+    ctx.translate(iconX, iconY);
+    ctx.fillStyle = '#FFFFFF';
+
+    switch (config.sourceType) {
+      case 'text':
+        ctx.font = `bold ${iconSize * 0.6}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(config.sourceValue, iconSize / 2, iconSize / 2);
+        break;
+      case 'clipart':
+        ctx.font = `${iconSize * 0.6}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(config.sourceValue, iconSize / 2, iconSize / 2);
+        break;
+      default:
+        ctx.font = `${iconSize * 0.5}px Inter`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✦', iconSize / 2, iconSize / 2);
+    }
+    ctx.restore();
+
+    // Draw app name on the right side
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${height * 0.12}px Inter, system-ui, sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(appName, width * 0.35, height / 2);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Could not create blob'));
+        }
+      },
+      'image/png',
+      1.0
+    );
+  });
 }
 
 function generateLaunchBackgroundXml(backgroundColor: string): string {
