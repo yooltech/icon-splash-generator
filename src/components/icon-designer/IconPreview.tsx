@@ -196,12 +196,7 @@ export function IconPreview({ config, size = 200, isDark = false }: IconPreviewP
 
       case 'icon':
       default:
-        // Draw a placeholder - actual icon rendering happens in SVG overlay
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = `${contentSize * 0.5}px Inter`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('✦', contentSize/2, contentSize/2);
+        // Icon rendering is handled by SVG overlay - don't draw anything on canvas
         break;
     }
 
