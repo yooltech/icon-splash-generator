@@ -18,6 +18,7 @@ import { IconDesigner } from '@/components/icon-designer';
 import { SplashDesigner } from '@/components/splash-designer';
 import { SuccessScreen } from '@/components/SuccessScreen';
 import { AndroidStudioOptions } from '@/components/AndroidStudioOptions';
+import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { generateAllIcons, generateAllSplashScreens } from '@/lib/imageProcessor';
 import { 
@@ -141,6 +142,7 @@ export function AssetGenerator() {
           </div>
         </header>
         <HeroSection onGetStarted={handleGetStarted} />
+        <Footer />
       </div>
     );
   }
