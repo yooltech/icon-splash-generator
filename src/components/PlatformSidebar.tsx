@@ -475,6 +475,68 @@ export function PlatformSidebar({
     </div>
   );
 
+  // Splash Screen options
+  const renderSplashOptions = () => (
+    <div className="space-y-6">
+      {renderCommonIconOptions()}
+      
+      <div className="glass-card p-4 space-y-4">
+        <h4 className="font-medium text-sm">Splash Screen Settings</h4>
+        
+        <div className="space-y-2">
+          <Label htmlFor="splash-app-name" className="text-xs">App Name</Label>
+          <Input
+            id="splash-app-name"
+            value={extendedOptions.splashAppName || 'My App'}
+            onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashAppName: e.target.value })}
+            placeholder="My App"
+            className="h-8 text-sm"
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="splash-show-name" className="text-sm">Show App Name</Label>
+          <Switch
+            id="splash-show-name"
+            checked={extendedOptions.splashShowName ?? true}
+            onCheckedChange={(checked) => 
+              onExtendedOptionsChange({ ...extendedOptions, splashShowName: checked })
+            }
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-xs">Text Color</Label>
+          <div className="flex gap-2">
+            <input
+              type="color"
+              value={extendedOptions.splashTextColor || '#FFFFFF'}
+              onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashTextColor: e.target.value })}
+              className="w-8 h-8 rounded border border-border cursor-pointer"
+            />
+            <Input
+              value={extendedOptions.splashTextColor || '#FFFFFF'}
+              onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashTextColor: e.target.value })}
+              placeholder="#FFFFFF"
+              className="h-8 text-sm font-mono flex-1"
+            />
+          </div>
+        </div>
+      </div>
+      
+      <div className="glass-card p-4 space-y-2">
+        <h4 className="font-medium text-sm">Output Sizes</h4>
+        <p className="text-xs text-muted-foreground">
+          Generates splash screens for Android & iOS:
+        </p>
+        <ul className="text-xs text-muted-foreground list-disc list-inside">
+          <li>Android: Portrait & Landscape (mdpi to xxxhdpi)</li>
+          <li>iOS: All device sizes (iPhone & iPad)</li>
+        </ul>
+      </div>
+    </div>
+  );
+
   return (
     <div className="h-full overflow-y-auto p-4 space-y-6">
       {activeTab === 'android' && renderAndroidOptions()}
@@ -483,6 +545,7 @@ export function PlatformSidebar({
       {activeTab === 'playStore' && renderPlayStoreOptions()}
       {activeTab === 'androidTV' && renderAndroidTVOptions()}
       {activeTab === 'tvOS' && renderTVOSOptions()}
+      {activeTab === 'splash' && renderSplashOptions()}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   Store,
   X,
   Check,
+  Sparkles,
 } from 'lucide-react';
 
 export type PlatformTab = 
@@ -16,7 +17,8 @@ export type PlatformTab =
   | 'web' 
   | 'androidTV' 
   | 'playStore' 
-  | 'tvOS';
+  | 'tvOS'
+  | 'splash';
 
 interface PlatformTabsProps {
   activeTab: PlatformTab;
@@ -32,6 +34,7 @@ const PLATFORM_TABS: { id: PlatformTab; label: string; icon: React.ComponentType
   { id: 'androidTV', label: 'Android TV Banner', icon: MonitorPlay },
   { id: 'playStore', label: 'Play Store Banner', icon: Store },
   { id: 'tvOS', label: 'tvOS App Icon', icon: Tv },
+  { id: 'splash', label: 'Splash Screen', icon: Sparkles },
 ];
 
 export function PlatformTabs({ 
