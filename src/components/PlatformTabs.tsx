@@ -7,7 +7,7 @@ import {
   MonitorPlay,
   Store,
   X,
-  Check,
+  Plus,
   Sparkles,
 } from 'lucide-react';
 
@@ -109,7 +109,7 @@ export function PlatformTabs({
               {isEnabled ? (
                 <X className="w-3 h-3" />
               ) : (
-                <Check className="w-3 h-3" />
+                <Plus className="w-3 h-3" />
               )}
             </motion.button>
           </motion.div>
