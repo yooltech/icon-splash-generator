@@ -1,34 +1,51 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Loader2, Sparkles, Play } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  Loader2, 
+  Sparkles, 
+  Palette, 
+  Image, 
+  Eye, 
+  Download,
+  Smartphone,
+  Apple
+} from 'lucide-react';
 import { StepIndicator } from '@/components/StepIndicator';
-import { UploadZone } from '@/components/UploadZone';
-import { PlatformSelector } from '@/components/PlatformSelector';
-import { SplashCustomizer } from '@/components/SplashCustomizer';
+import { IconDesigner } from '@/components/icon-designer';
+import { SplashDesigner } from '@/components/splash-designer';
 import { SuccessScreen } from '@/components/SuccessScreen';
 import { Button } from '@/components/ui/button';
-import { generateIcons, generateSplashScreens } from '@/lib/imageProcessor';
-import type { Platform, Framework, UploadedImage, GeneratedAsset } from '@/types/assets';
-import testIconSrc from '@/assets/test-icon.png';
-import testLogoSrc from '@/assets/test-logo.png';
+import { generateAllIcons, generateAllSplashScreens } from '@/lib/imageProcessor';
+import { 
+  type Platform, 
+  type Framework, 
+  type IconConfig,
+  type SplashConfig,
+  type GeneratedAsset,
+  DEFAULT_ICON_CONFIG,
+  DEFAULT_SPLASH_CONFIG,
+} from '@/types/assets';
 
-const STEPS = ['Upload', 'Customize', 'Generate', 'Download'];
+const STEPS = ['Icon', 'Splash', 'Preview', 'Generate'];
+
+const frameworkOptions: { id: Framework; label: string }[] = [
+  { id: 'capacitor', label: 'Capacitor' },
+  { id: 'flutter', label: 'Flutter' },
+  { id: 'react-native', label: 'React Native' },
+  { id: 'native', label: 'Native' },
+];
 
 export function AssetGenerator() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [iconImage, setIconImage] = useState<UploadedImage | null>(null);
-  const [splashLogo, setSplashLogo] = useState<UploadedImage | null>(null);
   const [platforms, setPlatforms] = useState<Platform[]>(['android', 'ios']);
   const [framework, setFramework] = useState<Framework>('capacitor');
-  const [backgroundColor, setBackgroundColor] = useState('#00D4AA');
-  const [isDarkSplash, setIsDarkSplash] = useState(false);
-  const [padding, setPadding] = useState(30);
+  const [iconConfig, setIconConfig] = useState<IconConfig>(DEFAULT_ICON_CONFIG);
+  const [splashConfig, setSplashConfig] = useState<SplashConfig>(DEFAULT_SPLASH_CONFIG);
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, phase: '' });
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([]);
-
-  const canProceedFromUpload = iconImage !== null && splashLogo !== null;
-  const canProceedFromCustomize = platforms.length > 0;
 
   const handleNext = useCallback(async () => {
     if (currentStep === 2) {
@@ -36,22 +53,19 @@ export function AssetGenerator() {
       setIsGenerating(true);
       try {
         const allAssets: GeneratedAsset[] = [];
-        
+
         // Generate icons
         setProgress({ current: 0, total: 0, phase: 'Generating icons...' });
-        const icons = await generateIcons(iconImage!, platforms, (current, total) => {
+        const icons = await generateAllIcons(iconConfig, platforms, (current, total) => {
           setProgress({ current, total, phase: 'Generating icons...' });
         });
         allAssets.push(...icons);
 
         // Generate splash screens
         setProgress({ current: 0, total: 0, phase: 'Generating splash screens...' });
-        const effectiveBackground = isDarkSplash ? '#0a0a0f' : backgroundColor;
-        const splashScreens = await generateSplashScreens(
-          splashLogo!,
+        const splashScreens = await generateAllSplashScreens(
+          splashConfig,
           platforms,
-          effectiveBackground,
-          padding,
           (current, total) => {
             setProgress({ current, total, phase: 'Generating splash screens...' });
           }
@@ -66,9 +80,9 @@ export function AssetGenerator() {
         setIsGenerating(false);
       }
     } else {
-      setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));
+      setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
     }
-  }, [currentStep, iconImage, splashLogo, platforms, backgroundColor, isDarkSplash, padding]);
+  }, [currentStep, iconConfig, splashConfig, platforms]);
 
   const handleBack = useCallback(() => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
@@ -76,53 +90,28 @@ export function AssetGenerator() {
 
   const handleReset = useCallback(() => {
     setCurrentStep(0);
-    setIconImage(null);
-    setSplashLogo(null);
     setGeneratedAssets([]);
   }, []);
 
-  const loadDemoAssets = useCallback(async () => {
-    try {
-      // Load test icon
-      const iconResponse = await fetch(testIconSrc);
-      const iconBlob = await iconResponse.blob();
-      const iconFile = new File([iconBlob], 'demo-icon.png', { type: 'image/png' });
-      const iconDataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(iconBlob);
-      });
-      setIconImage({ file: iconFile, dataUrl: iconDataUrl, width: 1024, height: 1024 });
-
-      // Load test logo
-      const logoResponse = await fetch(testLogoSrc);
-      const logoBlob = await logoResponse.blob();
-      const logoFile = new File([logoBlob], 'demo-logo.png', { type: 'image/png' });
-      const logoDataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(logoBlob);
-      });
-      setSplashLogo({ file: logoFile, dataUrl: logoDataUrl, width: 512, height: 512 });
-    } catch (error) {
-      console.error('Failed to load demo assets:', error);
+  const togglePlatform = (platform: Platform) => {
+    if (platforms.includes(platform)) {
+      if (platforms.length > 1) {
+        setPlatforms(platforms.filter((p) => p !== platform));
+      }
+    } else {
+      setPlatforms([...platforms, platform]);
     }
-  }, []);
-
-  const canProceed = 
-    (currentStep === 0 && canProceedFromUpload) ||
-    (currentStep === 1 && canProceedFromCustomize) ||
-    currentStep === 2;
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border py-4 px-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
             <h1 className="text-xl font-bold">
-              <span className="text-gradient">Asset</span> Generator
+              <span className="text-gradient">App Asset</span> Generator
             </h1>
           </div>
           <span className="text-xs text-muted-foreground">Android & iOS</span>
@@ -130,158 +119,223 @@ export function AssetGenerator() {
       </header>
 
       {/* Progress */}
-      <div className="py-8 px-6 border-b border-border">
-        <div className="max-w-4xl mx-auto">
+      <div className="py-6 px-6 border-b border-border">
+        <div className="max-w-6xl mx-auto">
           <StepIndicator steps={STEPS} currentStep={currentStep} />
         </div>
       </div>
 
       {/* Content */}
-      <main className="flex-1 py-8 px-6">
-        <div className="max-w-2xl mx-auto">
+      <main className="flex-1 py-8 px-6 overflow-y-auto">
+        <div className="max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
+            {/* Step 1: Icon Designer */}
             {currentStep === 0 && (
               <motion.div
-                key="upload"
+                key="icon"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Palette className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Design Your App Icon</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Choose source, background, shape, and effects
+                    </p>
+                  </div>
+                </div>
+
+                <IconDesigner config={iconConfig} onChange={setIconConfig} />
+              </motion.div>
+            )}
+
+            {/* Step 2: Splash Designer */}
+            {currentStep === 1 && (
+              <motion.div
+                key="splash"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Image className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Design Your Splash Screen</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Add logo, text, and customize the background
+                    </p>
+                  </div>
+                </div>
+
+                <SplashDesigner config={splashConfig} onChange={setSplashConfig} />
+              </motion.div>
+            )}
+
+            {/* Step 3: Preview & Settings */}
+            {currentStep === 2 && (
+              <motion.div
+                key="preview"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-8"
               >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2">Upload Your Assets</h2>
-                  <p className="text-muted-foreground">
-                    Start by uploading your app icon and splash logo
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={loadDemoAssets}
-                    className="mt-4 gap-2"
-                  >
-                    <Play className="w-3 h-3" />
-                    Use Demo Assets
-                  </Button>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Eye className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Preview & Generate</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Review your designs and select target platforms
+                    </p>
+                  </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <UploadZone
-                    label="App Icon"
-                    description="PNG, exactly 1024×1024 px"
-                    requiredWidth={1024}
-                    requiredHeight={1024}
-                    accept="image/png"
-                    value={iconImage}
-                    onChange={setIconImage}
-                  />
-                  <UploadZone
-                    label="Splash Logo"
-                    description="PNG or SVG, any size"
-                    accept="image/png,image/svg+xml"
-                    value={splashLogo}
-                    onChange={setSplashLogo}
-                  />
+                {/* Platform Selection */}
+                <div className="glass-card p-6">
+                  <h3 className="font-medium mb-4">Target Platforms</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => togglePlatform('android')}
+                      className={`
+                        flex items-center gap-3 p-4 rounded-xl border-2 transition-all
+                        ${platforms.includes('android')
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-secondary/30'
+                        }
+                      `}
+                    >
+                      <Smartphone className={`w-5 h-5 ${platforms.includes('android') ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className={platforms.includes('android') ? 'text-foreground' : 'text-muted-foreground'}>Android</span>
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => togglePlatform('ios')}
+                      className={`
+                        flex items-center gap-3 p-4 rounded-xl border-2 transition-all
+                        ${platforms.includes('ios')
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-secondary/30'
+                        }
+                      `}
+                    >
+                      <Apple className={`w-5 h-5 ${platforms.includes('ios') ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className={platforms.includes('ios') ? 'text-foreground' : 'text-muted-foreground'}>iOS</span>
+                    </motion.button>
+                  </div>
+
+                  <h4 className="font-medium mt-6 mb-3 text-sm text-muted-foreground">Framework Preset</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {frameworkOptions.map((option) => (
+                      <motion.button
+                        key={option.id}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setFramework(option.id)}
+                        className={`
+                          px-4 py-2 rounded-lg border text-sm transition-all
+                          ${framework === option.id
+                            ? 'border-primary bg-primary/10 text-foreground'
+                            : 'border-border bg-secondary/30 text-muted-foreground'
+                          }
+                        `}
+                      >
+                        {option.label}
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
 
-                <PlatformSelector
-                  platforms={platforms}
-                  framework={framework}
-                  onPlatformsChange={setPlatforms}
-                  onFrameworkChange={setFramework}
-                />
-              </motion.div>
-            )}
-
-            {currentStep === 1 && (
-              <motion.div
-                key="customize"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-              >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2">Customize Splash Screen</h2>
-                  <p className="text-muted-foreground">
-                    Choose colors and adjust your splash screen design
-                  </p>
-                </div>
-
-                <SplashCustomizer
-                  logoImage={splashLogo}
-                  backgroundColor={backgroundColor}
-                  isDarkSplash={isDarkSplash}
-                  padding={padding}
-                  onBackgroundColorChange={setBackgroundColor}
-                  onDarkSplashToggle={setIsDarkSplash}
-                  onPaddingChange={setPadding}
-                />
-              </motion.div>
-            )}
-
-            {currentStep === 2 && (
-              <motion.div
-                key="generate"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="text-center py-12"
-              >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2">Ready to Generate</h2>
-                  <p className="text-muted-foreground">
-                    Click the button below to generate all your assets
-                  </p>
-                </div>
-
-                <div className="glass-card p-8 mb-8">
-                  <div className="grid grid-cols-2 gap-6 text-left mb-8">
-                    <div>
-                      <h3 className="font-medium mb-2">App Icon</h3>
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-secondary">
-                        {iconImage && (
-                          <img src={iconImage.dataUrl} alt="Icon" className="w-full h-full object-cover" />
-                        )}
+                {/* Preview Summary */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Icon Preview */}
+                  <div className="glass-card p-6">
+                    <h3 className="font-medium mb-4">App Icon</h3>
+                    <div className="flex items-center gap-4">
+                      <div 
+                        className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                        style={{
+                          background: iconConfig.backgroundType === 'gradient'
+                            ? `linear-gradient(${iconConfig.gradient.direction.replace('to-', 'to ')}, ${iconConfig.gradient.colors.join(', ')})`
+                            : iconConfig.backgroundColor,
+                        }}
+                      >
+                        <span className="text-white text-2xl">
+                          {iconConfig.sourceType === 'clipart' ? iconConfig.sourceValue : '✦'}
+                        </span>
                       </div>
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-2">Splash Logo</h3>
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-secondary flex items-center justify-center">
-                        {splashLogo && (
-                          <img src={splashLogo.dataUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
-                        )}
+                      <div className="text-sm text-muted-foreground">
+                        <p>Shape: {iconConfig.shape}</p>
+                        <p>Background: {iconConfig.backgroundType}</p>
+                        <p>Filename: {iconConfig.filename}.png</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <p>Platforms: {platforms.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</p>
-                    <p>Framework: {framework.charAt(0).toUpperCase() + framework.slice(1).replace('-', ' ')}</p>
-                    <p>Background: {isDarkSplash ? 'Dark' : backgroundColor}</p>
+                  {/* Splash Preview */}
+                  <div className="glass-card p-6">
+                    <h3 className="font-medium mb-4">Splash Screen</h3>
+                    <div className="flex items-center gap-4">
+                      <div 
+                        className="w-14 h-24 rounded-lg flex items-center justify-center"
+                        style={{
+                          background: splashConfig.backgroundType === 'gradient'
+                            ? `linear-gradient(${splashConfig.gradient.direction.replace('to-', 'to ')}, ${splashConfig.gradient.colors.join(', ')})`
+                            : splashConfig.backgroundColor,
+                        }}
+                      >
+                        {splashConfig.logoImage && (
+                          <img 
+                            src={splashConfig.logoImage} 
+                            alt="Logo" 
+                            className="w-8 h-8 object-contain"
+                          />
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Content: {splashConfig.contentType}</p>
+                        <p>Position: {splashConfig.position}</p>
+                        <p>Scale: {splashConfig.scale}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {isGenerating && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="space-y-4"
-                  >
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                    <p className="text-sm text-muted-foreground">{progress.phase}</p>
-                    {progress.total > 0 && (
-                      <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                        <motion.div
-                          className="h-full bg-primary"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(progress.current / progress.total) * 100}%` }}
-                        />
-                      </div>
-                    )}
-                  </motion.div>
-                )}
+                {/* Generation Button */}
+                <div className="text-center">
+                  {isGenerating && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-4 mb-4"
+                    >
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                      <p className="text-sm text-muted-foreground">{progress.phase}</p>
+                      {progress.total > 0 && (
+                        <div className="w-64 mx-auto bg-secondary rounded-full h-2 overflow-hidden">
+                          <motion.div
+                            className="h-full bg-primary"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(progress.current / progress.total) * 100}%` }}
+                          />
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
               </motion.div>
             )}
 
+            {/* Step 4: Success/Download */}
             {currentStep === 3 && (
               <motion.div
                 key="download"
@@ -303,7 +357,7 @@ export function AssetGenerator() {
       {/* Footer Navigation */}
       {currentStep < 3 && (
         <footer className="border-t border-border py-4 px-6">
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={handleBack}
@@ -315,7 +369,7 @@ export function AssetGenerator() {
             </Button>
             <Button
               onClick={handleNext}
-              disabled={!canProceed || isGenerating}
+              disabled={isGenerating}
               className="gap-2 btn-primary-glow"
             >
               {currentStep === 2 ? (
@@ -327,7 +381,7 @@ export function AssetGenerator() {
                 ) : (
                   <>
                     Generate Assets
-                    <Sparkles className="w-4 h-4" />
+                    <Download className="w-4 h-4" />
                   </>
                 )
               ) : (

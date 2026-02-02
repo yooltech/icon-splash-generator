@@ -1,0 +1,1 @@
+export { SplashDesigner } from './SplashDesigner';
