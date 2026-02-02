@@ -4,31 +4,23 @@ import {
   Loader2, 
   Sparkles, 
   Download,
-  Layers,
-  Image,
-  ArrowRight,
 } from 'lucide-react';
 import { HeroSection } from '@/components/HeroSection';
 import { SuccessScreen } from '@/components/SuccessScreen';
 import { Footer } from '@/components/Footer';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlatformTabs, type PlatformTab } from '@/components/PlatformTabs';
 import { PlatformSidebar } from '@/components/PlatformSidebar';
 import { PlatformPreview } from '@/components/PlatformPreview';
-import { SplashDesigner } from '@/components/splash-designer';
-import { generateAllIcons, generateAllSplashScreens } from '@/lib/imageProcessor';
+import { generateAllIcons } from '@/lib/imageProcessor';
 import { 
   type Platform, 
-  type Framework, 
   type IconConfig,
-  type SplashConfig,
   type GeneratedAsset,
   type AndroidStudioOptions as AndroidStudioOptionsType,
   type ExtendedIconOptions as ExtendedIconOptionsType,
   DEFAULT_ICON_CONFIG,
-  DEFAULT_SPLASH_CONFIG,
   DEFAULT_ANDROID_STUDIO_OPTIONS,
   DEFAULT_EXTENDED_ICON_OPTIONS,
 } from '@/types/assets';
@@ -37,9 +29,7 @@ export function AssetGenerator() {
   const [showHero, setShowHero] = useState(true);
   const [activeTab, setActiveTab] = useState<PlatformTab>('android');
   const [enabledPlatforms, setEnabledPlatforms] = useState<Set<PlatformTab>>(new Set(['android']));
-  const [mainTab, setMainTab] = useState<'icon' | 'splash'>('icon');
   const [iconConfig, setIconConfig] = useState<IconConfig>(DEFAULT_ICON_CONFIG);
-  const [splashConfig, setSplashConfig] = useState<SplashConfig>(DEFAULT_SPLASH_CONFIG);
   const [androidStudioOptions, setAndroidStudioOptions] = useState<AndroidStudioOptionsType>(DEFAULT_ANDROID_STUDIO_OPTIONS);
   const [extendedIconOptions, setExtendedIconOptions] = useState<ExtendedIconOptionsType>(DEFAULT_EXTENDED_ICON_OPTIONS);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -100,9 +90,6 @@ export function AssetGenerator() {
   const handleGenerate = useCallback(async () => {
     setIsGenerating(true);
     try {
-      const allAssets: GeneratedAsset[] = [];
-
-      // Generate icons
       setProgress({ current: 0, total: 0, phase: 'Generating icons...' });
       const icons = await generateAllIcons(
         iconConfig, 
@@ -113,28 +100,15 @@ export function AssetGenerator() {
         androidStudioOptions,
         effectiveExtendedOptions
       );
-      allAssets.push(...icons);
 
-      // Generate splash screens
-      setProgress({ current: 0, total: 0, phase: 'Generating splash screens...' });
-      const splashScreens = await generateAllSplashScreens(
-        splashConfig,
-        platforms,
-        (current, total) => {
-          setProgress({ current, total, phase: 'Generating splash screens...' });
-        },
-        androidStudioOptions
-      );
-      allAssets.push(...splashScreens);
-
-      setGeneratedAssets(allAssets);
+      setGeneratedAssets(icons);
       setShowSuccess(true);
     } catch (error) {
       console.error('Failed to generate assets:', error);
     } finally {
       setIsGenerating(false);
     }
-  }, [iconConfig, splashConfig, platforms, androidStudioOptions, effectiveExtendedOptions]);
+  }, [iconConfig, platforms, androidStudioOptions, effectiveExtendedOptions]);
 
   const handleReset = useCallback(() => {
     setShowSuccess(false);
@@ -252,53 +226,25 @@ export function AssetGenerator() {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         <aside className="w-80 border-r border-border bg-card overflow-hidden flex flex-col">
-          {/* Icon/Splash Toggle */}
-          <div className="p-4 border-b border-border">
-            <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as 'icon' | 'splash')}>
-              <TabsList className="w-full">
-                <TabsTrigger value="icon" className="flex-1 gap-2">
-                  <Layers className="w-4 h-4" />
-                  Icon
-                </TabsTrigger>
-                <TabsTrigger value="splash" className="flex-1 gap-2">
-                  <Image className="w-4 h-4" />
-                  Splash
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* Sidebar Content */}
+          {/* Sidebar Content - Platform specific */}
           <div className="flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
-              {mainTab === 'icon' ? (
-                <motion.div
-                  key="icon-sidebar"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                >
-                  <PlatformSidebar
-                    activeTab={activeTab}
-                    iconConfig={iconConfig}
-                    onIconConfigChange={setIconConfig}
-                    androidStudioOptions={androidStudioOptions}
-                    onAndroidStudioOptionsChange={setAndroidStudioOptions}
-                    extendedOptions={extendedIconOptions}
-                    onExtendedOptionsChange={setExtendedIconOptions}
-                  />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="splash-sidebar"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="p-4"
-                >
-                  <SplashDesigner config={splashConfig} onChange={setSplashConfig} />
-                </motion.div>
-              )}
+              <motion.div
+                key={`sidebar-${activeTab}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+              >
+                <PlatformSidebar
+                  activeTab={activeTab}
+                  iconConfig={iconConfig}
+                  onIconConfigChange={setIconConfig}
+                  androidStudioOptions={androidStudioOptions}
+                  onAndroidStudioOptionsChange={setAndroidStudioOptions}
+                  extendedOptions={extendedIconOptions}
+                  onExtendedOptionsChange={setExtendedIconOptions}
+                />
+              </motion.div>
             </AnimatePresence>
           </div>
         </aside>
@@ -307,44 +253,17 @@ export function AssetGenerator() {
         <main className="flex-1 overflow-auto p-6">
           <AnimatePresence mode="wait">
             <motion.div
-              key={`${activeTab}-${mainTab}`}
+              key={activeTab}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               className="h-full"
             >
-              {mainTab === 'icon' ? (
-                <PlatformPreview
-                  activeTab={activeTab}
-                  iconConfig={iconConfig}
-                  extendedOptions={extendedIconOptions}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center p-8 bg-muted/30 rounded-xl">
-                  {/* Splash Preview */}
-                  <div 
-                    className="w-48 h-80 rounded-3xl shadow-2xl flex items-center justify-center"
-                    style={{
-                      background: splashConfig.backgroundType === 'gradient'
-                        ? `linear-gradient(${splashConfig.gradient.direction.replace('to-', 'to ')}, ${splashConfig.gradient.colors.join(', ')})`
-                        : splashConfig.backgroundColor,
-                    }}
-                  >
-                    {splashConfig.logoImage && (
-                      <img 
-                        src={splashConfig.logoImage} 
-                        alt="Splash Logo" 
-                        className="max-w-20 max-h-20 object-contain"
-                      />
-                    )}
-                    {splashConfig.contentType === 'text' && (
-                      <span className="text-xl font-bold" style={{ color: splashConfig.textColor }}>
-                        {splashConfig.text}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
+              <PlatformPreview
+                activeTab={activeTab}
+                iconConfig={iconConfig}
+                extendedOptions={extendedIconOptions}
+              />
             </motion.div>
           </AnimatePresence>
         </main>
