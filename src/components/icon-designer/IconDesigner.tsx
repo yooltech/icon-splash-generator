@@ -7,6 +7,7 @@ import { IconSourceSelector } from './IconSourceSelector';
 import { BackgroundEditor } from './BackgroundEditor';
 import { ShapeSelector } from './ShapeSelector';
 import { IconPreview } from './IconPreview';
+import { AdaptiveIconEditor } from './AdaptiveIconEditor';
 import type { IconConfig, ScalingMode, IconEffect } from '@/types/assets';
 
 interface IconDesignerProps {
@@ -156,6 +157,9 @@ export function IconDesigner({ config, onChange }: IconDesignerProps) {
             className="bg-secondary/50"
           />
         </div>
+
+        {/* Adaptive Icon */}
+        <AdaptiveIconEditor config={config} onChange={onChange} />
       </div>
 
       {/* Preview */}
