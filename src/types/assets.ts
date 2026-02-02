@@ -115,6 +115,19 @@ export interface ExtendedIconOptions {
   tvOS: boolean;
   androidTV: boolean;
   playStore: boolean;
+  // Customization options
+  webAppName: string;
+  webThemeColor: string;
+  playStoreAppName: string;
+  customSizes: CustomIconSize[];
+}
+
+export interface CustomIconSize {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  enabled: boolean;
 }
 
 export const DEFAULT_EXTENDED_ICON_OPTIONS: ExtendedIconOptions = {
@@ -123,6 +136,10 @@ export const DEFAULT_EXTENDED_ICON_OPTIONS: ExtendedIconOptions = {
   tvOS: false,
   androidTV: false,
   playStore: false,
+  webAppName: 'My App',
+  webThemeColor: '#3B82F6',
+  playStoreAppName: 'My App',
+  customSizes: [],
 };
 
 // macOS icon sizes (for .icns generation)
