@@ -1,6 +1,74 @@
 export type Platform = 'android' | 'ios';
 export type Framework = 'capacitor' | 'flutter' | 'react-native' | 'native';
 
+// Icon Source Types
+export type IconSourceType = 'icon' | 'clipart' | 'text' | 'image';
+
+// Icon Scaling
+export type ScalingMode = 'center' | 'crop' | 'mask';
+
+// Icon Effect
+export type IconEffect = 'none' | 'padding';
+
+// Background Types
+export type BackgroundType = 'color' | 'gradient' | 'mesh' | 'image' | 'texture' | 'none';
+
+// Icon Shapes
+export type IconShape = 'square' | 'squircle' | 'circle' | 'themed';
+
+// Gradient Direction
+export type GradientDirection = 'to-b' | 'to-t' | 'to-r' | 'to-l' | 'to-br' | 'to-bl' | 'to-tr' | 'to-tl';
+
+// Splash Position
+export type SplashPosition = 'center' | 'top' | 'bottom';
+
+// Splash Scale
+export type SplashScale = 'small' | 'medium' | 'large';
+
+// Splash Content Type
+export type SplashContentType = 'logo' | 'text' | 'logo-text';
+
+export interface GradientConfig {
+  colors: string[];
+  direction: GradientDirection;
+}
+
+export interface MeshConfig {
+  colors: string[];
+}
+
+export interface IconConfig {
+  sourceType: IconSourceType;
+  sourceValue: string; // icon name, text, or image data URL
+  scalingMode: ScalingMode;
+  effect: IconEffect;
+  paddingPercent: number;
+  backgroundType: BackgroundType;
+  backgroundColor: string;
+  gradient: GradientConfig;
+  mesh: MeshConfig;
+  backgroundImage: string | null;
+  texture: string;
+  shape: IconShape;
+  hasBadge: boolean;
+  badgeColor: string;
+  filename: string;
+}
+
+export interface SplashConfig {
+  contentType: SplashContentType;
+  logoImage: string | null;
+  text: string;
+  textColor: string;
+  textFont: string;
+  position: SplashPosition;
+  scale: SplashScale;
+  backgroundType: 'color' | 'gradient' | 'image';
+  backgroundColor: string;
+  gradient: GradientConfig;
+  backgroundImage: string | null;
+}
+
 export interface IconSize {
   name: string;
   size: number;
@@ -19,9 +87,8 @@ export interface SplashSize {
 export interface AssetConfig {
   platforms: Platform[];
   framework: Framework;
-  splashBackgroundColor: string;
-  isDarkSplash: boolean;
-  logoPadding: number;
+  iconConfig: IconConfig;
+  splashConfig: SplashConfig;
 }
 
 export interface UploadedImage {
@@ -36,6 +103,46 @@ export interface GeneratedAsset {
   path: string;
   blob: Blob;
 }
+
+export const DEFAULT_ICON_CONFIG: IconConfig = {
+  sourceType: 'icon',
+  sourceValue: 'Sparkles',
+  scalingMode: 'center',
+  effect: 'padding',
+  paddingPercent: 15,
+  backgroundType: 'gradient',
+  backgroundColor: '#3B82F6',
+  gradient: {
+    colors: ['#3B82F6', '#8B5CF6'],
+    direction: 'to-br',
+  },
+  mesh: {
+    colors: ['#3B82F6', '#8B5CF6', '#EC4899', '#10B981'],
+  },
+  backgroundImage: null,
+  texture: 'noise',
+  shape: 'squircle',
+  hasBadge: false,
+  badgeColor: '#EF4444',
+  filename: 'ic_launcher',
+};
+
+export const DEFAULT_SPLASH_CONFIG: SplashConfig = {
+  contentType: 'logo',
+  logoImage: null,
+  text: 'My App',
+  textColor: '#FFFFFF',
+  textFont: 'Inter',
+  position: 'center',
+  scale: 'medium',
+  backgroundType: 'color',
+  backgroundColor: '#3B82F6',
+  gradient: {
+    colors: ['#3B82F6', '#8B5CF6'],
+    direction: 'to-b',
+  },
+  backgroundImage: null,
+};
 
 export const ANDROID_ICON_SIZES: IconSize[] = [
   { name: 'mipmap-mdpi', size: 48, folder: 'android/icons', platform: 'android' },
@@ -69,6 +176,11 @@ export const ANDROID_SPLASH_SIZES: SplashSize[] = [
   { name: 'splash-port-xhdpi', width: 720, height: 1280, folder: 'android/splash', platform: 'android' },
   { name: 'splash-port-xxhdpi', width: 960, height: 1600, folder: 'android/splash', platform: 'android' },
   { name: 'splash-port-xxxhdpi', width: 1280, height: 1920, folder: 'android/splash', platform: 'android' },
+  { name: 'splash-land-mdpi', width: 480, height: 320, folder: 'android/splash', platform: 'android' },
+  { name: 'splash-land-hdpi', width: 800, height: 480, folder: 'android/splash', platform: 'android' },
+  { name: 'splash-land-xhdpi', width: 1280, height: 720, folder: 'android/splash', platform: 'android' },
+  { name: 'splash-land-xxhdpi', width: 1600, height: 960, folder: 'android/splash', platform: 'android' },
+  { name: 'splash-land-xxxhdpi', width: 1920, height: 1280, folder: 'android/splash', platform: 'android' },
 ];
 
 export const IOS_SPLASH_SIZES: SplashSize[] = [
@@ -81,4 +193,21 @@ export const IOS_SPLASH_SIZES: SplashSize[] = [
   { name: 'Default-896h@3x~iphone', width: 1242, height: 2688, folder: 'ios/splash', platform: 'ios' },
   { name: 'Default-1024h@2x~ipad', width: 1536, height: 2048, folder: 'ios/splash', platform: 'ios' },
   { name: 'Default-1366h@2x~ipad', width: 2048, height: 2732, folder: 'ios/splash', platform: 'ios' },
+  { name: 'Default-Landscape-667h@2x', width: 1334, height: 750, folder: 'ios/splash', platform: 'ios' },
+  { name: 'Default-Landscape-736h@3x', width: 2208, height: 1242, folder: 'ios/splash', platform: 'ios' },
+  { name: 'Default-Landscape-1024h@2x', width: 2048, height: 1536, folder: 'ios/splash', platform: 'ios' },
 ];
+
+// Popular Lucide icons for the icon library
+export const ICON_LIBRARY = [
+  'Sparkles', 'Star', 'Heart', 'Zap', 'Flame', 'Rocket', 'Music', 'Camera',
+  'ShoppingCart', 'MessageCircle', 'Bell', 'Settings', 'Home', 'User', 'Mail',
+  'Phone', 'Calendar', 'Clock', 'Map', 'Gift', 'Bookmark', 'Award', 'Trophy',
+  'Target', 'Compass', 'Sun', 'Moon', 'Cloud', 'Umbrella', 'Coffee', 'Pizza',
+  'Gamepad2', 'Headphones', 'Mic', 'Video', 'Image', 'Palette', 'Brush', 'Pen',
+  'Code', 'Terminal', 'Database', 'Globe', 'Wifi', 'Battery', 'Shield', 'Lock',
+  'Key', 'CreditCard', 'Wallet', 'PiggyBank', 'TrendingUp', 'BarChart', 'Activity',
+  'Dumbbell', 'Bike', 'Car', 'Plane', 'Ship', 'Train', 'Bus', 'Building',
+];
+
+export const TEXTURE_OPTIONS = ['noise', 'dots', 'lines', 'grid', 'waves'];
