@@ -3,10 +3,13 @@ import {
   IOS_ICON_SIZES,
   ANDROID_SPLASH_SIZES,
   IOS_SPLASH_SIZES,
+  ANDROID_STUDIO_ICON_SIZES,
+  ANDROID_STUDIO_SPLASH_SIZES,
   type Platform,
   type GeneratedAsset,
   type IconConfig,
   type SplashConfig,
+  type AndroidStudioOptions,
 } from '@/types/assets';
 
 export async function generateIconFromConfig(
@@ -397,52 +400,215 @@ async function drawSplashContent(
 export async function generateAllIcons(
   config: IconConfig,
   platforms: Platform[],
-  onProgress: (current: number, total: number) => void
+  onProgress: (current: number, total: number) => void,
+  androidStudioOptions?: AndroidStudioOptions
 ): Promise<GeneratedAsset[]> {
   const assets: GeneratedAsset[] = [];
+  const useAndroidStudio = androidStudioOptions?.enabled && platforms.includes('android');
+  
   const sizes = [
-    ...(platforms.includes('android') ? ANDROID_ICON_SIZES : []),
+    ...(platforms.includes('android') 
+      ? (useAndroidStudio ? ANDROID_STUDIO_ICON_SIZES : ANDROID_ICON_SIZES) 
+      : []),
     ...(platforms.includes('ios') ? IOS_ICON_SIZES : []),
   ];
 
-  for (let i = 0; i < sizes.length; i++) {
-    const sizeConfig = sizes[i];
+  let totalAssets = sizes.length;
+  if (useAndroidStudio) {
+    if (androidStudioOptions.generateRoundIcon) totalAssets += ANDROID_STUDIO_ICON_SIZES.length;
+    if (androidStudioOptions.generateForeground) totalAssets += ANDROID_STUDIO_ICON_SIZES.length;
+    if (androidStudioOptions.generateAdaptiveXml) totalAssets += 1;
+  }
+
+  let currentAsset = 0;
+
+  for (const sizeConfig of sizes) {
     const blob = await generateIconFromConfig(config, sizeConfig.size);
-    assets.push({
-      name: `${config.filename || 'ic_launcher'}.png`,
-      path: `${sizeConfig.folder}/${sizeConfig.name}/${config.filename || 'ic_launcher'}.png`,
-      blob,
-    });
-    onProgress(i + 1, sizes.length);
+    
+    if (useAndroidStudio && sizeConfig.platform === 'android') {
+      // Android Studio format: folder/filename.png
+      assets.push({
+        name: `${config.filename || 'ic_launcher'}.png`,
+        path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}.png`,
+        blob,
+      });
+    } else if (sizeConfig.platform === 'android') {
+      // Generic format: android/icons/folder/filename.png
+      assets.push({
+        name: `${config.filename || 'ic_launcher'}.png`,
+        path: `${sizeConfig.folder}/${sizeConfig.name}/${config.filename || 'ic_launcher'}.png`,
+        blob,
+      });
+    } else {
+      // iOS format
+      assets.push({
+        name: `${sizeConfig.name}.png`,
+        path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+        blob,
+      });
+    }
+    currentAsset++;
+    onProgress(currentAsset, totalAssets);
+  }
+
+  // Generate additional Android Studio assets
+  if (useAndroidStudio) {
+    // Round icons
+    if (androidStudioOptions.generateRoundIcon) {
+      for (const sizeConfig of ANDROID_STUDIO_ICON_SIZES) {
+        const roundConfig = { ...config, shape: 'circle' as const };
+        const blob = await generateIconFromConfig(roundConfig, sizeConfig.size);
+        assets.push({
+          name: `${config.filename || 'ic_launcher'}_round.png`,
+          path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}_round.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+    }
+
+    // Foreground icons (transparent background)
+    if (androidStudioOptions.generateForeground) {
+      for (const sizeConfig of ANDROID_STUDIO_ICON_SIZES) {
+        const foregroundConfig = { ...config, backgroundType: 'none' as const, shape: 'square' as const };
+        const blob = await generateIconFromConfig(foregroundConfig, sizeConfig.size);
+        assets.push({
+          name: `${config.filename || 'ic_launcher'}_foreground.png`,
+          path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}_foreground.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+    }
+
+    // Adaptive icon XML
+    if (androidStudioOptions.generateAdaptiveXml) {
+      const adaptiveXml = generateAdaptiveIconXml(config);
+      const xmlBlob = new Blob([adaptiveXml], { type: 'application/xml' });
+      assets.push({
+        name: 'ic_launcher.xml',
+        path: `mipmap-anydpi-v26/ic_launcher.xml`,
+        blob: xmlBlob,
+      });
+      
+      // Also add round adaptive icon XML
+      const adaptiveRoundXml = generateAdaptiveIconXml(config, true);
+      const xmlRoundBlob = new Blob([adaptiveRoundXml], { type: 'application/xml' });
+      assets.push({
+        name: 'ic_launcher_round.xml',
+        path: `mipmap-anydpi-v26/ic_launcher_round.xml`,
+        blob: xmlRoundBlob,
+      });
+      
+      currentAsset++;
+      onProgress(currentAsset, totalAssets);
+    }
   }
 
   return assets;
 }
 
+function generateAdaptiveIconXml(config: IconConfig, isRound = false): string {
+  const filename = config.filename || 'ic_launcher';
+  return `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/${filename}_foreground"/>
+    ${isRound ? '<monochrome android:drawable="@mipmap/' + filename + '_foreground"/>' : ''}
+</adaptive-icon>`;
+}
+
+function generateLaunchBackgroundXml(backgroundColor: string): string {
+  return `<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background"/>
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_icon"/>
+    </item>
+</layer-list>`;
+}
+
+function generateColorsXml(iconBgColor: string, splashBgColor: string): string {
+  return `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">${iconBgColor}</color>
+    <color name="splash_background">${splashBgColor}</color>
+</resources>`;
+}
+
 export async function generateAllSplashScreens(
   config: SplashConfig,
   platforms: Platform[],
-  onProgress: (current: number, total: number) => void
+  onProgress: (current: number, total: number) => void,
+  androidStudioOptions?: AndroidStudioOptions
 ): Promise<GeneratedAsset[]> {
   const assets: GeneratedAsset[] = [];
+  const useAndroidStudio = androidStudioOptions?.enabled && platforms.includes('android');
+  
   const sizes = [
-    ...(platforms.includes('android') ? ANDROID_SPLASH_SIZES : []),
+    ...(platforms.includes('android') 
+      ? (useAndroidStudio ? ANDROID_STUDIO_SPLASH_SIZES : ANDROID_SPLASH_SIZES) 
+      : []),
     ...(platforms.includes('ios') ? IOS_SPLASH_SIZES : []),
   ];
 
-  for (let i = 0; i < sizes.length; i++) {
-    const sizeConfig = sizes[i];
+  let totalAssets = sizes.length;
+  if (useAndroidStudio && androidStudioOptions.generateSplashXml) {
+    totalAssets += 2; // launch_background.xml and colors.xml
+  }
+
+  let currentAsset = 0;
+
+  for (const sizeConfig of sizes) {
     const blob = await generateSplashFromConfig(
       config,
       sizeConfig.width,
       sizeConfig.height
     );
+    
+    if (useAndroidStudio && sizeConfig.platform === 'android') {
+      // Android Studio format
+      assets.push({
+        name: `${sizeConfig.name}.png`,
+        path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+        blob,
+      });
+    } else {
+      assets.push({
+        name: `${sizeConfig.name}.png`,
+        path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+        blob,
+      });
+    }
+    currentAsset++;
+    onProgress(currentAsset, totalAssets);
+  }
+
+  // Generate Android 12+ splash XML files
+  if (useAndroidStudio && androidStudioOptions.generateSplashXml) {
+    const launchBackgroundXml = generateLaunchBackgroundXml(config.backgroundColor);
+    const xmlBlob = new Blob([launchBackgroundXml], { type: 'application/xml' });
     assets.push({
-      name: `${sizeConfig.name}.png`,
-      path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
-      blob,
+      name: 'launch_background.xml',
+      path: 'drawable-v24/launch_background.xml',
+      blob: xmlBlob,
     });
-    onProgress(i + 1, sizes.length);
+    
+    // Generate colors.xml
+    const colorsXml = generateColorsXml('#3B82F6', config.backgroundColor);
+    const colorsBlob = new Blob([colorsXml], { type: 'application/xml' });
+    assets.push({
+      name: 'colors.xml',
+      path: 'values/colors.xml',
+      blob: colorsBlob,
+    });
+    
+    currentAsset += 2;
+    onProgress(currentAsset, totalAssets);
   }
 
   return assets;

@@ -17,6 +17,7 @@ import { HeroSection } from '@/components/HeroSection';
 import { IconDesigner } from '@/components/icon-designer';
 import { SplashDesigner } from '@/components/splash-designer';
 import { SuccessScreen } from '@/components/SuccessScreen';
+import { AndroidStudioOptions } from '@/components/AndroidStudioOptions';
 import { Button } from '@/components/ui/button';
 import { generateAllIcons, generateAllSplashScreens } from '@/lib/imageProcessor';
 import { 
@@ -25,8 +26,10 @@ import {
   type IconConfig,
   type SplashConfig,
   type GeneratedAsset,
+  type AndroidStudioOptions as AndroidStudioOptionsType,
   DEFAULT_ICON_CONFIG,
   DEFAULT_SPLASH_CONFIG,
+  DEFAULT_ANDROID_STUDIO_OPTIONS,
 } from '@/types/assets';
 
 const STEPS = ['Icon', 'Splash', 'Preview', 'Generate'];
@@ -45,6 +48,7 @@ export function AssetGenerator() {
   const [framework, setFramework] = useState<Framework>('capacitor');
   const [iconConfig, setIconConfig] = useState<IconConfig>(DEFAULT_ICON_CONFIG);
   const [splashConfig, setSplashConfig] = useState<SplashConfig>(DEFAULT_SPLASH_CONFIG);
+  const [androidStudioOptions, setAndroidStudioOptions] = useState<AndroidStudioOptionsType>(DEFAULT_ANDROID_STUDIO_OPTIONS);
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, phase: '' });
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([]);
@@ -62,9 +66,14 @@ export function AssetGenerator() {
 
         // Generate icons
         setProgress({ current: 0, total: 0, phase: 'Generating icons...' });
-        const icons = await generateAllIcons(iconConfig, platforms, (current, total) => {
-          setProgress({ current, total, phase: 'Generating icons...' });
-        });
+        const icons = await generateAllIcons(
+          iconConfig, 
+          platforms, 
+          (current, total) => {
+            setProgress({ current, total, phase: 'Generating icons...' });
+          },
+          androidStudioOptions
+        );
         allAssets.push(...icons);
 
         // Generate splash screens
@@ -74,7 +83,8 @@ export function AssetGenerator() {
           platforms,
           (current, total) => {
             setProgress({ current, total, phase: 'Generating splash screens...' });
-          }
+          },
+          androidStudioOptions
         );
         allAssets.push(...splashScreens);
 
@@ -88,7 +98,7 @@ export function AssetGenerator() {
     } else {
       setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
     }
-  }, [currentStep, iconConfig, splashConfig, platforms]);
+  }, [currentStep, iconConfig, splashConfig, platforms, androidStudioOptions]);
 
   const handleBack = useCallback(() => {
     if (currentStep === 0) {
@@ -289,6 +299,13 @@ export function AssetGenerator() {
                     ))}
                   </div>
                 </div>
+
+                {/* Android Studio Options */}
+                <AndroidStudioOptions
+                  options={androidStudioOptions}
+                  onChange={setAndroidStudioOptions}
+                  hasAndroid={platforms.includes('android')}
+                />
 
                 {/* Preview Summary */}
                 <div className="grid md:grid-cols-2 gap-6">

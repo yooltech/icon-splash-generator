@@ -91,11 +91,28 @@ export interface SplashSize {
   platform: Platform;
 }
 
+export interface AndroidStudioOptions {
+  enabled: boolean;
+  generateRoundIcon: boolean;
+  generateForeground: boolean;
+  generateAdaptiveXml: boolean;
+  generateSplashXml: boolean;
+}
+
+export const DEFAULT_ANDROID_STUDIO_OPTIONS: AndroidStudioOptions = {
+  enabled: false,
+  generateRoundIcon: true,
+  generateForeground: true,
+  generateAdaptiveXml: true,
+  generateSplashXml: true,
+};
+
 export interface AssetConfig {
   platforms: Platform[];
   framework: Framework;
   iconConfig: IconConfig;
   splashConfig: SplashConfig;
+  androidStudioOptions: AndroidStudioOptions;
 }
 
 export interface UploadedImage {
@@ -166,6 +183,32 @@ export const ANDROID_ICON_SIZES: IconSize[] = [
   { name: 'mipmap-xhdpi', size: 96, folder: 'android/icons', platform: 'android' },
   { name: 'mipmap-xxhdpi', size: 144, folder: 'android/icons', platform: 'android' },
   { name: 'mipmap-xxxhdpi', size: 192, folder: 'android/icons', platform: 'android' },
+];
+
+// Android Studio proper folder structure
+export const ANDROID_STUDIO_ICON_SIZES: IconSize[] = [
+  { name: 'ic_launcher', size: 48, folder: 'mipmap-mdpi', platform: 'android' },
+  { name: 'ic_launcher', size: 72, folder: 'mipmap-hdpi', platform: 'android' },
+  { name: 'ic_launcher', size: 96, folder: 'mipmap-xhdpi', platform: 'android' },
+  { name: 'ic_launcher', size: 144, folder: 'mipmap-xxhdpi', platform: 'android' },
+  { name: 'ic_launcher', size: 192, folder: 'mipmap-xxxhdpi', platform: 'android' },
+];
+
+export const ANDROID_STUDIO_SPLASH_SIZES: SplashSize[] = [
+  // Portrait
+  { name: 'splash', width: 240, height: 320, folder: 'drawable-port-ldpi', platform: 'android' },
+  { name: 'splash', width: 320, height: 480, folder: 'drawable-port-mdpi', platform: 'android' },
+  { name: 'splash', width: 480, height: 800, folder: 'drawable-port-hdpi', platform: 'android' },
+  { name: 'splash', width: 720, height: 1280, folder: 'drawable-port-xhdpi', platform: 'android' },
+  { name: 'splash', width: 960, height: 1600, folder: 'drawable-port-xxhdpi', platform: 'android' },
+  { name: 'splash', width: 1280, height: 1920, folder: 'drawable-port-xxxhdpi', platform: 'android' },
+  // Landscape
+  { name: 'splash', width: 320, height: 240, folder: 'drawable-land-ldpi', platform: 'android' },
+  { name: 'splash', width: 480, height: 320, folder: 'drawable-land-mdpi', platform: 'android' },
+  { name: 'splash', width: 800, height: 480, folder: 'drawable-land-hdpi', platform: 'android' },
+  { name: 'splash', width: 1280, height: 720, folder: 'drawable-land-xhdpi', platform: 'android' },
+  { name: 'splash', width: 1600, height: 960, folder: 'drawable-land-xxhdpi', platform: 'android' },
+  { name: 'splash', width: 1920, height: 1280, folder: 'drawable-land-xxxhdpi', platform: 'android' },
 ];
 
 export const IOS_ICON_SIZES: IconSize[] = [
