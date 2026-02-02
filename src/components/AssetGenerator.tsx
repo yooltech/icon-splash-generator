@@ -53,9 +53,27 @@ export function AssetGenerator() {
 
   const handleTabChange = useCallback((tab: PlatformTab) => {
     setActiveTab(tab);
-    // Auto-enable the platform when selected
-    setEnabledPlatforms(prev => new Set([...prev, tab]));
   }, []);
+
+  const handleTogglePlatform = useCallback((tab: PlatformTab) => {
+    setEnabledPlatforms(prev => {
+      const next = new Set(prev);
+      if (next.has(tab)) {
+        // Don't allow removing the last platform
+        if (next.size > 1) {
+          next.delete(tab);
+          // If we removed the active tab, switch to another enabled tab
+          if (tab === activeTab) {
+            const remaining = Array.from(next);
+            setActiveTab(remaining[0]);
+          }
+        }
+      } else {
+        next.add(tab);
+      }
+      return next;
+    });
+  }, [activeTab]);
 
   // Convert PlatformTab set to Platform array for generation
   const platforms = useMemo((): Platform[] => {
@@ -225,6 +243,7 @@ export function AssetGenerator() {
             activeTab={activeTab}
             enabledPlatforms={enabledPlatforms}
             onTabChange={handleTabChange}
+            onTogglePlatform={handleTogglePlatform}
           />
         </div>
       </div>
