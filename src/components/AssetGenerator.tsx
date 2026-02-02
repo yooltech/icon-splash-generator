@@ -6,7 +6,7 @@ import {
   Download,
 } from 'lucide-react';
 import { HeroSection } from '@/components/HeroSection';
-import { SuccessScreen } from '@/components/SuccessScreen';
+import { SuccessModal } from '@/components/SuccessModal';
 import { Footer } from '@/components/Footer';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
@@ -110,9 +110,8 @@ export function AssetGenerator() {
     }
   }, [iconConfig, platforms, androidStudioOptions, effectiveExtendedOptions]);
 
-  const handleReset = useCallback(() => {
+  const handleCloseSuccess = useCallback(() => {
     setShowSuccess(false);
-    setGeneratedAssets([]);
   }, []);
 
   // Show hero section
@@ -141,37 +140,6 @@ export function AssetGenerator() {
     );
   }
 
-  // Show success screen
-  if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <header className="border-b border-border py-4 px-6">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <button 
-              onClick={() => setShowHero(true)}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <Sparkles className="w-6 h-6 text-primary" />
-              <h1 className="text-xl font-bold">
-                <span className="text-gradient">Splash</span>Craft
-              </h1>
-            </button>
-            <ThemeToggle />
-          </div>
-        </header>
-        <main className="flex-1 py-8 px-6">
-          <div className="max-w-6xl mx-auto">
-            <SuccessScreen
-              assets={generatedAssets}
-              platforms={platforms}
-              framework="capacitor"
-              onReset={handleReset}
-            />
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -297,6 +265,14 @@ export function AssetGenerator() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Success Modal */}
+      <SuccessModal
+        open={showSuccess}
+        onClose={handleCloseSuccess}
+        assets={generatedAssets}
+        platforms={platforms}
+      />
     </div>
   );
 }
