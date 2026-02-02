@@ -68,6 +68,9 @@ export function ExtendedIconOptions({
   const [expandedSettings, setExpandedSettings] = useState<string | null>(null);
   const [showCustomSizes, setShowCustomSizes] = useState(false);
 
+  // Ensure customSizes is always an array
+  const customSizes = options.customSizes ?? [];
+
   const toggleSettings = (key: string) => {
     setExpandedSettings(expandedSettings === key ? null : key);
   };
@@ -82,14 +85,14 @@ export function ExtendedIconOptions({
     };
     onChange({
       ...options,
-      customSizes: [...options.customSizes, newSize],
+      customSizes: [...customSizes, newSize],
     });
   };
 
   const updateCustomSize = (id: string, updates: Partial<CustomIconSize>) => {
     onChange({
       ...options,
-      customSizes: options.customSizes.map((size) =>
+      customSizes: customSizes.map((size) =>
         size.id === id ? { ...size, ...updates } : size
       ),
     });
@@ -98,7 +101,7 @@ export function ExtendedIconOptions({
   const removeCustomSize = (id: string) => {
     onChange({
       ...options,
-      customSizes: options.customSizes.filter((size) => size.id !== id),
+      customSizes: customSizes.filter((size) => size.id !== id),
     });
   };
 
@@ -269,7 +272,7 @@ export function ExtendedIconOptions({
               Add custom icon sizes for specific requirements.
             </p>
 
-            {options.customSizes.map((size) => (
+            {customSizes.map((size) => (
               <div key={size.id} className="flex items-center gap-2">
                 <Checkbox
                   checked={size.enabled}
@@ -325,7 +328,7 @@ export function ExtendedIconOptions({
       {/* Output preview when any option is selected */}
       {(Object.entries(options).some(([key, val]) => 
         ['macOS', 'web', 'tvOS', 'androidTV', 'playStore'].includes(key) && val
-      ) || options.customSizes.some(s => s.enabled)) && (
+      ) || customSizes.some(s => s.enabled)) && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
@@ -365,11 +368,11 @@ export function ExtendedIconOptions({
                 <span className="text-muted-foreground">feature-graphic, hi-res-icon</span>
               </div>
             )}
-            {options.customSizes.filter(s => s.enabled).length > 0 && (
+            {customSizes.filter(s => s.enabled).length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-primary">custom/</span>
                 <span className="text-muted-foreground">
-                  {options.customSizes.filter(s => s.enabled).map(s => `${s.name}.png`).join(', ')}
+                  {customSizes.filter(s => s.enabled).map(s => `${s.name}.png`).join(', ')}
                 </span>
               </div>
             )}
