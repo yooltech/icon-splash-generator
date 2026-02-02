@@ -443,10 +443,10 @@ export async function generateAllIcons(
     const blob = await generateIconFromConfig(config, sizeConfig.size);
     
     if (useAndroidStudio && sizeConfig.platform === 'android') {
-      // Android Studio format: folder/filename.png
+      // Android Studio format: android/res/folder/filename.png
       assets.push({
         name: `${config.filename || 'ic_launcher'}.png`,
-        path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}.png`,
+        path: `android/res/${sizeConfig.folder}/${config.filename || 'ic_launcher'}.png`,
         blob,
       });
     } else if (sizeConfig.platform === 'android') {
@@ -477,7 +477,7 @@ export async function generateAllIcons(
         const blob = await generateIconFromConfig(roundConfig, sizeConfig.size);
         assets.push({
           name: `${config.filename || 'ic_launcher'}_round.png`,
-          path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}_round.png`,
+          path: `android/res/${sizeConfig.folder}/${config.filename || 'ic_launcher'}_round.png`,
           blob,
         });
         currentAsset++;
@@ -492,7 +492,7 @@ export async function generateAllIcons(
         const blob = await generateIconFromConfig(foregroundConfig, sizeConfig.size);
         assets.push({
           name: `${config.filename || 'ic_launcher'}_foreground.png`,
-          path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}_foreground.png`,
+          path: `android/res/${sizeConfig.folder}/${config.filename || 'ic_launcher'}_foreground.png`,
           blob,
         });
         currentAsset++;
@@ -506,7 +506,7 @@ export async function generateAllIcons(
         const blob = await generateMonochromeIcon(config, sizeConfig.size);
         assets.push({
           name: `${config.filename || 'ic_launcher'}_monochrome.png`,
-          path: `${sizeConfig.folder}/${config.filename || 'ic_launcher'}_monochrome.png`,
+          path: `android/res/${sizeConfig.folder}/${config.filename || 'ic_launcher'}_monochrome.png`,
           blob,
         });
         currentAsset++;
@@ -520,7 +520,7 @@ export async function generateAllIcons(
       const xmlBlob = new Blob([adaptiveXml], { type: 'application/xml' });
       assets.push({
         name: 'ic_launcher.xml',
-        path: `mipmap-anydpi-v26/ic_launcher.xml`,
+        path: `android/res/mipmap-anydpi-v26/ic_launcher.xml`,
         blob: xmlBlob,
       });
       
@@ -529,7 +529,7 @@ export async function generateAllIcons(
       const xmlRoundBlob = new Blob([adaptiveRoundXml], { type: 'application/xml' });
       assets.push({
         name: 'ic_launcher_round.xml',
-        path: `mipmap-anydpi-v26/ic_launcher_round.xml`,
+        path: `android/res/mipmap-anydpi-v26/ic_launcher_round.xml`,
         blob: xmlRoundBlob,
       });
       
@@ -887,10 +887,10 @@ export async function generateAllSplashScreens(
     );
     
     if (useAndroidStudio && sizeConfig.platform === 'android') {
-      // Android Studio format
+      // Android Studio format with android/res/ prefix
       assets.push({
         name: `${sizeConfig.name}.png`,
-        path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+        path: `android/res/${sizeConfig.folder}/${sizeConfig.name}.png`,
         blob,
       });
     } else {
@@ -910,7 +910,7 @@ export async function generateAllSplashScreens(
     const xmlBlob = new Blob([launchBackgroundXml], { type: 'application/xml' });
     assets.push({
       name: 'launch_background.xml',
-      path: 'drawable-v24/launch_background.xml',
+      path: 'android/res/drawable-v24/launch_background.xml',
       blob: xmlBlob,
     });
     
@@ -919,7 +919,7 @@ export async function generateAllSplashScreens(
     const colorsBlob = new Blob([colorsXml], { type: 'application/xml' });
     assets.push({
       name: 'colors.xml',
-      path: 'values/colors.xml',
+      path: 'android/res/values/colors.xml',
       blob: colorsBlob,
     });
     

@@ -55,9 +55,20 @@ const frameworkDocs: Record<Framework, { label: string; url: string; steps: stri
 };
 
 export function SuccessScreen({ assets, platforms, framework, onReset }: SuccessScreenProps) {
-  const androidIcons = assets.filter((a) => a.path.includes('android/icons')).length;
+  // Count Android assets (both generic and Android Studio formats)
+  const androidIcons = assets.filter((a) => 
+    a.path.includes('android/icons') || 
+    a.path.startsWith('android/mipmap-') ||
+    a.path.startsWith('android/res/mipmap-')
+  ).length;
+  const androidSplash = assets.filter((a) => 
+    a.path.includes('android/splash') || 
+    a.path.startsWith('android/drawable-') ||
+    a.path.startsWith('android/res/drawable-')
+  ).length;
+  
+  // Count iOS assets
   const iosIcons = assets.filter((a) => a.path.includes('ios/icons')).length;
-  const androidSplash = assets.filter((a) => a.path.includes('android/splash')).length;
   const iosSplash = assets.filter((a) => a.path.includes('ios/splash')).length;
 
   const docs = frameworkDocs[framework];
