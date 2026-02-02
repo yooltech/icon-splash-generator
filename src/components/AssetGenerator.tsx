@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, Sparkles, Play } from 'lucide-react';
 import { StepIndicator } from '@/components/StepIndicator';
 import { UploadZone } from '@/components/UploadZone';
 import { PlatformSelector } from '@/components/PlatformSelector';
@@ -9,6 +9,8 @@ import { SuccessScreen } from '@/components/SuccessScreen';
 import { Button } from '@/components/ui/button';
 import { generateIcons, generateSplashScreens } from '@/lib/imageProcessor';
 import type { Platform, Framework, UploadedImage, GeneratedAsset } from '@/types/assets';
+import testIconSrc from '@/assets/test-icon.png';
+import testLogoSrc from '@/assets/test-logo.png';
 
 const STEPS = ['Upload', 'Customize', 'Generate', 'Download'];
 
@@ -79,6 +81,34 @@ export function AssetGenerator() {
     setGeneratedAssets([]);
   }, []);
 
+  const loadDemoAssets = useCallback(async () => {
+    try {
+      // Load test icon
+      const iconResponse = await fetch(testIconSrc);
+      const iconBlob = await iconResponse.blob();
+      const iconFile = new File([iconBlob], 'demo-icon.png', { type: 'image/png' });
+      const iconDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(iconBlob);
+      });
+      setIconImage({ file: iconFile, dataUrl: iconDataUrl, width: 1024, height: 1024 });
+
+      // Load test logo
+      const logoResponse = await fetch(testLogoSrc);
+      const logoBlob = await logoResponse.blob();
+      const logoFile = new File([logoBlob], 'demo-logo.png', { type: 'image/png' });
+      const logoDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(logoBlob);
+      });
+      setSplashLogo({ file: logoFile, dataUrl: logoDataUrl, width: 512, height: 512 });
+    } catch (error) {
+      console.error('Failed to load demo assets:', error);
+    }
+  }, []);
+
   const canProceed = 
     (currentStep === 0 && canProceedFromUpload) ||
     (currentStep === 1 && canProceedFromCustomize) ||
@@ -123,6 +153,15 @@ export function AssetGenerator() {
                   <p className="text-muted-foreground">
                     Start by uploading your app icon and splash logo
                   </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadDemoAssets}
+                    className="mt-4 gap-2"
+                  >
+                    <Play className="w-3 h-3" />
+                    Use Demo Assets
+                  </Button>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
