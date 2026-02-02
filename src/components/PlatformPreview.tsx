@@ -284,6 +284,71 @@ export function PlatformPreview({
     </div>
   );
 
+  // Splash Screen preview
+  const renderSplashPreview = () => (
+    <div className="relative">
+      {/* Phone Frame */}
+      <div className="relative w-[280px] h-[560px] mx-auto bg-gradient-to-br from-slate-800 to-slate-900 rounded-[40px] p-3 shadow-2xl">
+        {/* Screen */}
+        <div 
+          className="relative w-full h-full rounded-[28px] overflow-hidden flex flex-col items-center justify-center"
+          style={{
+            background: iconConfig.backgroundType === 'gradient'
+              ? `linear-gradient(${iconConfig.gradient.direction.replace('to-', 'to ')}, ${iconConfig.gradient.colors.join(', ')})`
+              : iconConfig.backgroundColor,
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <IconPreview config={iconConfig} size={100} />
+          </motion.div>
+          
+          {extendedOptions.splashShowName !== false && (
+            <motion.h2
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-2xl font-bold mt-6 drop-shadow-lg"
+              style={{ color: extendedOptions.splashTextColor || '#FFFFFF' }}
+            >
+              {extendedOptions.splashAppName || 'My App'}
+            </motion.h2>
+          )}
+          
+          {/* Loading indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="absolute bottom-16"
+          >
+            <div className="flex gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="w-2 h-2 rounded-full bg-white/60"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1,
+                    delay: i * 0.2,
+                  }}
+                />
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+      
+      <p className="text-center text-sm text-muted-foreground mt-4">
+        Splash Screen Preview
+      </p>
+    </div>
+  );
+
   return (
     <div className="h-full flex items-center justify-center p-8 bg-muted/30 rounded-xl">
       {activeTab === 'android' && renderAndroidPreview()}
@@ -292,6 +357,7 @@ export function PlatformPreview({
       {activeTab === 'playStore' && renderPlayStorePreview()}
       {activeTab === 'androidTV' && renderAndroidTVPreview()}
       {activeTab === 'tvOS' && renderTVOSPreview()}
+      {activeTab === 'splash' && renderSplashPreview()}
     </div>
   );
 }

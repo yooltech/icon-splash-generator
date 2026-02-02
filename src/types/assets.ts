@@ -120,6 +120,10 @@ export interface ExtendedIconOptions {
   webThemeColor: string;
   playStoreAppName: string;
   customSizes: CustomIconSize[];
+  // Splash screen options
+  splashAppName: string;
+  splashShowName: boolean;
+  splashTextColor: string;
 }
 
 export interface CustomIconSize {
@@ -140,6 +144,9 @@ export const DEFAULT_EXTENDED_ICON_OPTIONS: ExtendedIconOptions = {
   webThemeColor: '#3B82F6',
   playStoreAppName: 'My App',
   customSizes: [],
+  splashAppName: 'My App',
+  splashShowName: true,
+  splashTextColor: '#FFFFFF',
 };
 
 // macOS icon sizes (for .icns generation)
