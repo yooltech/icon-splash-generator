@@ -5,7 +5,9 @@ import {
   Globe, 
   Tv, 
   MonitorPlay,
-  Store
+  Store,
+  X,
+  Check,
 } from 'lucide-react';
 
 export type PlatformTab = 
@@ -20,6 +22,7 @@ interface PlatformTabsProps {
   activeTab: PlatformTab;
   enabledPlatforms: Set<PlatformTab>;
   onTabChange: (tab: PlatformTab) => void;
+  onTogglePlatform: (tab: PlatformTab) => void;
 }
 
 const PLATFORM_TABS: { id: PlatformTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -34,7 +37,8 @@ const PLATFORM_TABS: { id: PlatformTab; label: string; icon: React.ComponentType
 export function PlatformTabs({ 
   activeTab, 
   enabledPlatforms,
-  onTabChange 
+  onTabChange,
+  onTogglePlatform,
 }: PlatformTabsProps) {
   return (
     <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -44,47 +48,68 @@ export function PlatformTabs({
         const isEnabled = enabledPlatforms.has(tab.id);
         
         return (
-          <motion.button
+          <motion.div
             key={tab.id}
             whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onTabChange(tab.id)}
-            className={`
-              relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all min-w-[100px]
-              ${isActive 
-                ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' 
-                : isEnabled 
-                  ? 'border-primary/50 bg-primary/5 hover:border-primary'
-                  : 'border-border bg-card hover:border-primary/50'
-              }
-            `}
+            className="relative"
           >
-            <div className={`
-              w-12 h-12 rounded-xl flex items-center justify-center transition-colors
-              ${isActive 
-                ? 'bg-primary text-primary-foreground' 
-                : isEnabled
-                  ? 'bg-primary/20 text-primary'
-                  : 'bg-secondary text-muted-foreground'
-              }
-            `}>
-              <Icon className="w-6 h-6" />
-            </div>
-            <span className={`text-xs font-medium text-center leading-tight ${
-              isActive || isEnabled ? 'text-foreground' : 'text-muted-foreground'
-            }`}>
-              {tab.label}
-            </span>
+            <button
+              onClick={() => onTabChange(tab.id)}
+              className={`
+                relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all min-w-[100px]
+                ${isActive 
+                  ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' 
+                  : isEnabled 
+                    ? 'border-primary/50 bg-primary/5 hover:border-primary'
+                    : 'border-border bg-card hover:border-primary/50 opacity-60'
+                }
+              `}
+            >
+              <div className={`
+                w-12 h-12 rounded-xl flex items-center justify-center transition-colors
+                ${isActive 
+                  ? 'bg-primary text-primary-foreground' 
+                  : isEnabled
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-secondary text-muted-foreground'
+                }
+              `}>
+                <Icon className="w-6 h-6" />
+              </div>
+              <span className={`text-xs font-medium text-center leading-tight ${
+                isActive || isEnabled ? 'text-foreground' : 'text-muted-foreground'
+              }`}>
+                {tab.label}
+              </span>
+            </button>
             
-            {/* Active indicator dot */}
-            {isEnabled && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary border-2 border-background"
-              />
-            )}
-          </motion.button>
+            {/* Toggle button */}
+            <motion.button
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePlatform(tab.id);
+              }}
+              className={`
+                absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center
+                border-2 border-background shadow-md transition-colors z-10
+                ${isEnabled 
+                  ? 'bg-primary text-primary-foreground hover:bg-destructive' 
+                  : 'bg-secondary text-muted-foreground hover:bg-primary hover:text-primary-foreground'
+                }
+              `}
+              title={isEnabled ? 'Remove from export' : 'Add to export'}
+            >
+              {isEnabled ? (
+                <X className="w-3 h-3" />
+              ) : (
+                <Check className="w-3 h-3" />
+              )}
+            </motion.button>
+          </motion.div>
         );
       })}
     </div>
