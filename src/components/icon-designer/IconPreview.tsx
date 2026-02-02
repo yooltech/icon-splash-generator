@@ -244,25 +244,26 @@ export function IconPreview({ config, size = 200, isDark = false }: IconPreviewP
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      className="relative inline-block"
+      className="relative inline-flex items-center justify-center"
       style={{ 
-        width: size, 
-        height: size,
+        width: size + 16, 
+        height: size + 16,
         backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
         borderRadius: 8,
-        padding: 8,
       }}
     >
-      <canvas
-        ref={canvasRef}
-        width={size}
-        height={size}
-        className="block"
-        style={{ 
-          borderRadius: config.shape === 'circle' ? '50%' : config.shape === 'squircle' ? '22%' : 0,
-        }}
-      />
-      {renderIconOverlay()}
+      <div className="relative" style={{ width: size, height: size }}>
+        <canvas
+          ref={canvasRef}
+          width={size}
+          height={size}
+          className="block"
+          style={{ 
+            borderRadius: config.shape === 'circle' ? '50%' : config.shape === 'squircle' ? '22%' : 0,
+          }}
+        />
+        {renderIconOverlay()}
+      </div>
     </motion.div>
   );
 }
