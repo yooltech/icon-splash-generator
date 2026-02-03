@@ -349,6 +349,174 @@ export function PlatformPreview({
     </div>
   );
 
+  // macOS preview
+  const renderMacOSPreview = () => (
+    <div className="max-w-2xl mx-auto">
+      {/* macOS Desktop Mockup */}
+      <div className="bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl p-8 shadow-2xl">
+        {/* Mac Screen */}
+        <div className="bg-slate-800 rounded-lg overflow-hidden">
+          {/* Menu Bar */}
+          <div className="h-6 bg-slate-700/50 flex items-center px-4">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-400" />
+              <div className="w-3 h-3 rounded-full bg-yellow-400" />
+              <div className="w-3 h-3 rounded-full bg-green-400" />
+            </div>
+          </div>
+          
+          {/* Desktop */}
+          <div className="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 p-8 min-h-[300px]">
+            {/* Dock */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-xl rounded-2xl px-4 py-2 flex items-end gap-2">
+              <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+                <span className="text-white text-lg">🔍</span>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center">
+                <span className="text-lg">⚙️</span>
+              </div>
+              <div className="relative">
+                <IconPreview config={iconConfig} size={48} />
+                <motion.div
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full"
+                />
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+                <span className="text-white text-lg">📧</span>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center">
+                <span className="text-lg">📁</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Size Grid */}
+      <div className="mt-6 grid grid-cols-5 gap-4 text-center text-xs text-muted-foreground">
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={iconConfig} size={16} />
+          </div>
+          <span>16×16</span>
+        </div>
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={iconConfig} size={32} />
+          </div>
+          <span>32×32</span>
+        </div>
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={iconConfig} size={64} />
+          </div>
+          <span>128×128</span>
+        </div>
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={iconConfig} size={64} />
+          </div>
+          <span>256×256</span>
+        </div>
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={iconConfig} size={64} />
+          </div>
+          <span>512×512</span>
+        </div>
+      </div>
+      
+      <p className="text-center text-sm text-muted-foreground mt-4">
+        macOS App Icon (10 sizes @ 1x and 2x)
+      </p>
+    </div>
+  );
+
+  // watchOS preview
+  const renderWatchOSPreview = () => (
+    <div className="flex flex-col items-center gap-8">
+      {/* Apple Watch Mockup */}
+      <div className="relative">
+        {/* Watch Frame */}
+        <div className="w-[180px] h-[220px] bg-gradient-to-br from-slate-700 to-slate-900 rounded-[40px] p-2 shadow-2xl">
+          {/* Watch Band Top */}
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-[140px] h-12 bg-gradient-to-b from-slate-600 to-slate-700 rounded-t-xl" />
+          {/* Watch Band Bottom */}
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-[140px] h-12 bg-gradient-to-t from-slate-600 to-slate-700 rounded-b-xl" />
+          
+          {/* Screen */}
+          <div className="relative w-full h-full bg-black rounded-[32px] overflow-hidden flex flex-col">
+            {/* Time */}
+            <div className="text-center pt-4">
+              <span className="text-white text-2xl font-light">10:09</span>
+            </div>
+            
+            {/* App Grid */}
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                  <span className="text-white text-sm">📞</span>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                  <span className="text-white text-sm">💬</span>
+                </div>
+                <IconPreview config={{...iconConfig, shape: 'circle'}} size={40} />
+                <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+                  <span className="text-white text-sm">❤️</span>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center">
+                  <span className="text-white text-sm">🎵</span>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">
+                  <span className="text-white text-sm">📍</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Digital Crown */}
+          <div className="absolute top-1/4 -right-1 w-2 h-8 bg-slate-600 rounded-r-full" />
+          {/* Side Button */}
+          <div className="absolute top-1/2 -right-1 w-2 h-4 bg-slate-600 rounded-r-full" />
+        </div>
+      </div>
+      
+      {/* Size Requirements */}
+      <div className="grid grid-cols-4 gap-4 text-center text-xs text-muted-foreground">
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={{...iconConfig, shape: 'circle'}} size={24} />
+          </div>
+          <span>24@2x</span>
+        </div>
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={{...iconConfig, shape: 'circle'}} size={40} />
+          </div>
+          <span>40@2x</span>
+        </div>
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={{...iconConfig, shape: 'circle'}} size={44} />
+          </div>
+          <span>44@2x</span>
+        </div>
+        <div>
+          <div className="bg-card rounded-lg p-3 mb-2 flex items-center justify-center">
+            <IconPreview config={{...iconConfig, shape: 'circle'}} size={50} />
+          </div>
+          <span>50@2x</span>
+        </div>
+      </div>
+      
+      <p className="text-center text-sm text-muted-foreground">
+        watchOS App Icon (14 sizes, circular)
+      </p>
+    </div>
+  );
+
   return (
     <div className="h-full flex items-start justify-center p-8 pt-12 bg-muted/30 rounded-xl overflow-auto">
       {activeTab === 'android' && renderAndroidPreview()}
@@ -358,6 +526,8 @@ export function PlatformPreview({
       {activeTab === 'androidTV' && renderAndroidTVPreview()}
       {activeTab === 'tvOS' && renderTVOSPreview()}
       {activeTab === 'splash' && renderSplashPreview()}
+      {activeTab === 'macOS' && renderMacOSPreview()}
+      {activeTab === 'watchOS' && renderWatchOSPreview()}
     </div>
   );
 }

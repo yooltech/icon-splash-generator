@@ -11,6 +11,7 @@ import {
   TVOS_TOP_SHELF_SIZES,
   ANDROID_TV_BANNER_SIZES,
   PLAY_STORE_SIZES,
+  WATCHOS_ICON_SIZES,
   type Platform,
   type GeneratedAsset,
   type IconConfig,
@@ -436,6 +437,7 @@ export async function generateAllIcons(
   if (extendedIconOptions?.tvOS) totalAssets += TVOS_ICON_SIZES.length + TVOS_TOP_SHELF_SIZES.length;
   if (extendedIconOptions?.androidTV) totalAssets += ANDROID_TV_BANNER_SIZES.length;
   if (extendedIconOptions?.playStore) totalAssets += PLAY_STORE_SIZES.length;
+  if (extendedIconOptions?.watchOS) totalAssets += WATCHOS_ICON_SIZES.length + 1; // +1 for Contents.json
   if (extendedIconOptions?.customSizes) {
     totalAssets += extendedIconOptions.customSizes.filter(s => s.enabled).length;
   }
@@ -662,6 +664,31 @@ export async function generateAllIcons(
       }
     }
 
+    // watchOS icons
+    if (extendedIconOptions.watchOS) {
+      for (const sizeConfig of WATCHOS_ICON_SIZES) {
+        // watchOS icons are circular
+        const watchConfig = { ...config, shape: 'circle' as const };
+        const blob = await generateIconFromConfig(watchConfig, sizeConfig.size);
+        assets.push({
+          name: `${sizeConfig.name}.png`,
+          path: `${sizeConfig.folder}/${sizeConfig.name}.png`,
+          blob,
+        });
+        currentAsset++;
+        onProgress(currentAsset, totalAssets);
+      }
+      // Add watchOS Contents.json
+      const watchContentsJson = generateWatchOSContentsJson();
+      assets.push({
+        name: 'Contents.json',
+        path: 'watchos/AppIcon.appiconset/Contents.json',
+        blob: new Blob([watchContentsJson], { type: 'application/json' }),
+      });
+      currentAsset++;
+      onProgress(currentAsset, totalAssets);
+    }
+
     // Custom sizes
     if (extendedIconOptions.customSizes) {
       for (const customSize of extendedIconOptions.customSizes.filter(s => s.enabled)) {
@@ -852,6 +879,25 @@ function generateMacOSContentsJson(): string {
     scale: size.name.includes('@2x') ? '2x' : '1x',
     size: `${size.name.includes('@2x') ? size.size / 2 : size.size}x${size.name.includes('@2x') ? size.size / 2 : size.size}`,
   }));
+
+  return JSON.stringify({ images, info: { author: 'SplashCraft', version: 1 } }, null, 2);
+}
+
+function generateWatchOSContentsJson(): string {
+  const images = WATCHOS_ICON_SIZES.map((size) => {
+    const match = size.name.match(/watch-(\d+(?:\.\d+)?)(?:@(\d)x)?/);
+    const baseSize = match ? parseFloat(match[1]) : size.size;
+    const scale = match?.[2] || '1';
+    
+    return {
+      filename: `${size.name}.png`,
+      idiom: 'watch',
+      scale: `${scale}x`,
+      size: `${baseSize}x${baseSize}`,
+      role: size.size >= 172 ? 'quickLook' : size.size >= 80 ? 'appLauncher' : 'notificationCenter',
+      subtype: size.size >= 196 ? '44mm' : size.size >= 172 ? '42mm' : size.size >= 80 ? '40mm' : '38mm',
+    };
+  });
 
   return JSON.stringify({ images, info: { author: 'SplashCraft', version: 1 } }, null, 2);
 }
