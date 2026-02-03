@@ -190,35 +190,10 @@ export function AssetGenerator() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-80 border-r border-border bg-card overflow-hidden flex flex-col">
-          {/* Sidebar Content - Platform specific */}
-          <div className="flex-1 overflow-y-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`sidebar-${activeTab}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-              >
-                <PlatformSidebar
-                  activeTab={activeTab}
-                  iconConfig={iconConfig}
-                  onIconConfigChange={setIconConfig}
-                  androidStudioOptions={androidStudioOptions}
-                  onAndroidStudioOptionsChange={setAndroidStudioOptions}
-                  extendedOptions={extendedIconOptions}
-                  onExtendedOptionsChange={setExtendedIconOptions}
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </aside>
-
-        {/* Preview Area */}
-        <main className="flex-1 overflow-auto p-6">
+      {/* Main Content - Preview on top, sidebar below */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Preview Area - Top */}
+        <main className="flex-1 overflow-auto p-6 min-h-[300px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -235,6 +210,30 @@ export function AssetGenerator() {
             </motion.div>
           </AnimatePresence>
         </main>
+
+        {/* Sidebar - Bottom */}
+        <aside className="border-t border-border bg-card overflow-hidden">
+          <div className="max-h-[280px] overflow-y-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`sidebar-${activeTab}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+              >
+                <PlatformSidebar
+                  activeTab={activeTab}
+                  iconConfig={iconConfig}
+                  onIconConfigChange={setIconConfig}
+                  androidStudioOptions={androidStudioOptions}
+                  onAndroidStudioOptionsChange={setAndroidStudioOptions}
+                  extendedOptions={extendedIconOptions}
+                  onExtendedOptionsChange={setExtendedIconOptions}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </aside>
       </div>
 
       {/* Generation Progress Overlay */}
