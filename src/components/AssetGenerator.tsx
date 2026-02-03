@@ -13,10 +13,11 @@ import { Button } from '@/components/ui/button';
 import { PlatformTabs, type PlatformTab } from '@/components/PlatformTabs';
 import { PlatformSidebar } from '@/components/PlatformSidebar';
 import { PlatformPreview } from '@/components/PlatformPreview';
-import { generateAllIcons } from '@/lib/imageProcessor';
+import { generateAllIcons, generateAllSplashScreens } from '@/lib/imageProcessor';
 import { 
   type Platform, 
   type IconConfig,
+  type SplashConfig,
   type GeneratedAsset,
   type AndroidStudioOptions as AndroidStudioOptionsType,
   type ExtendedIconOptions as ExtendedIconOptionsType,
@@ -88,9 +89,27 @@ export function AssetGenerator() {
     watchOS: enabledPlatforms.has('watchOS'),
   }), [extendedIconOptions, enabledPlatforms]);
 
+  // Derive SplashConfig from iconConfig and extendedOptions
+  const splashConfig = useMemo((): SplashConfig => ({
+    contentType: iconConfig.sourceType === 'image' ? 'logo' : 'text',
+    logoImage: iconConfig.sourceType === 'image' ? iconConfig.sourceValue : null,
+    text: extendedIconOptions.splashAppName || 'My App',
+    textColor: extendedIconOptions.splashTextColor || '#FFFFFF',
+    textFont: 'Inter',
+    position: 'center',
+    scale: 'medium',
+    backgroundType: iconConfig.backgroundType === 'gradient' ? 'gradient' : 'color',
+    backgroundColor: iconConfig.backgroundColor,
+    gradient: iconConfig.gradient,
+    backgroundImage: null,
+  }), [iconConfig, extendedIconOptions]);
+
   const handleGenerate = useCallback(async () => {
     setIsGenerating(true);
     try {
+      let allAssets: GeneratedAsset[] = [];
+      
+      // Generate icons
       setProgress({ current: 0, total: 0, phase: 'Generating icons...' });
       const icons = await generateAllIcons(
         iconConfig, 
@@ -101,15 +120,30 @@ export function AssetGenerator() {
         androidStudioOptions,
         effectiveExtendedOptions
       );
+      allAssets = [...icons];
 
-      setGeneratedAssets(icons);
+      // Generate splash screens if enabled
+      if (enabledPlatforms.has('splash')) {
+        setProgress({ current: 0, total: 0, phase: 'Generating splash screens...' });
+        const splashAssets = await generateAllSplashScreens(
+          splashConfig,
+          platforms,
+          (current, total) => {
+            setProgress({ current, total, phase: 'Generating splash screens...' });
+          },
+          androidStudioOptions
+        );
+        allAssets = [...allAssets, ...splashAssets];
+      }
+
+      setGeneratedAssets(allAssets);
       setShowSuccess(true);
     } catch (error) {
       console.error('Failed to generate assets:', error);
     } finally {
       setIsGenerating(false);
     }
-  }, [iconConfig, platforms, androidStudioOptions, effectiveExtendedOptions]);
+  }, [iconConfig, platforms, androidStudioOptions, effectiveExtendedOptions, enabledPlatforms, splashConfig]);
 
   const handleCloseSuccess = useCallback(() => {
     setShowSuccess(false);
