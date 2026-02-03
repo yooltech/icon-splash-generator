@@ -104,30 +104,38 @@ export function AssetGenerator() {
     backgroundImage: null,
   }), [iconConfig, extendedIconOptions]);
 
+  // Check if any icon platform is enabled (not just splash)
+  const hasIconPlatforms = useMemo(() => {
+    const iconPlatforms: PlatformTab[] = ['android', 'ios', 'web', 'macOS', 'tvOS', 'androidTV', 'playStore', 'watchOS'];
+    return iconPlatforms.some(p => enabledPlatforms.has(p));
+  }, [enabledPlatforms]);
+
   const handleGenerate = useCallback(async () => {
     setIsGenerating(true);
     try {
       let allAssets: GeneratedAsset[] = [];
       
-      // Generate icons
-      setProgress({ current: 0, total: 0, phase: 'Generating icons...' });
-      const icons = await generateAllIcons(
-        iconConfig, 
-        platforms, 
-        (current, total) => {
-          setProgress({ current, total, phase: 'Generating icons...' });
-        },
-        androidStudioOptions,
-        effectiveExtendedOptions
-      );
-      allAssets = [...icons];
+      // Generate icons only if icon platforms are enabled
+      if (hasIconPlatforms) {
+        setProgress({ current: 0, total: 0, phase: 'Generating icons...' });
+        const icons = await generateAllIcons(
+          iconConfig, 
+          platforms, 
+          (current, total) => {
+            setProgress({ current, total, phase: 'Generating icons...' });
+          },
+          androidStudioOptions,
+          effectiveExtendedOptions
+        );
+        allAssets = [...icons];
+      }
 
       // Generate splash screens if enabled
       if (enabledPlatforms.has('splash')) {
         setProgress({ current: 0, total: 0, phase: 'Generating splash screens...' });
         const splashAssets = await generateAllSplashScreens(
           splashConfig,
-          platforms,
+          platforms.length > 0 ? platforms : ['android'], // Default to android if no platforms
           (current, total) => {
             setProgress({ current, total, phase: 'Generating splash screens...' });
           },
@@ -143,7 +151,7 @@ export function AssetGenerator() {
     } finally {
       setIsGenerating(false);
     }
-  }, [iconConfig, platforms, androidStudioOptions, effectiveExtendedOptions, enabledPlatforms, splashConfig]);
+  }, [iconConfig, platforms, androidStudioOptions, effectiveExtendedOptions, enabledPlatforms, splashConfig, hasIconPlatforms]);
 
   const handleCloseSuccess = useCallback(() => {
     setShowSuccess(false);
