@@ -115,6 +115,7 @@ export interface ExtendedIconOptions {
   tvOS: boolean;
   androidTV: boolean;
   playStore: boolean;
+  watchOS: boolean;
   // Customization options
   webAppName: string;
   webThemeColor: string;
@@ -140,6 +141,7 @@ export const DEFAULT_EXTENDED_ICON_OPTIONS: ExtendedIconOptions = {
   tvOS: false,
   androidTV: false,
   playStore: false,
+  watchOS: false,
   webAppName: 'My App',
   webThemeColor: '#3B82F6',
   playStoreAppName: 'My App',
@@ -180,6 +182,24 @@ export const TVOS_ICON_SIZES: IconSize[] = [
   { name: 'App Icon - App Store 1x', size: 1280, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets', platform: 'ios' },
   { name: 'App Icon - Small 1x', size: 400, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets', platform: 'ios' },
   { name: 'App Icon - Small 2x', size: 800, folder: 'tvos/Assets.xcassets/App Icon & Top Shelf Image.brandassets', platform: 'ios' },
+];
+
+// watchOS icon sizes
+export const WATCHOS_ICON_SIZES: IconSize[] = [
+  { name: 'watch-24@2x', size: 48, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-27.5@2x', size: 55, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-29@2x', size: 58, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-29@3x', size: 87, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-40@2x', size: 80, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-44@2x', size: 88, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-46@2x', size: 92, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-50@2x', size: 100, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-51@2x', size: 102, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-54@2x', size: 108, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-86@2x', size: 172, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-98@2x', size: 196, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-108@2x', size: 216, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
+  { name: 'watch-1024', size: 1024, folder: 'watchos/AppIcon.appiconset', platform: 'ios' },
 ];
 
 // tvOS Top Shelf sizes (these are banners, not square icons)

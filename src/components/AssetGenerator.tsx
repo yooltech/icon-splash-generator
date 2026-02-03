@@ -81,10 +81,11 @@ export function AssetGenerator() {
   const effectiveExtendedOptions = useMemo((): ExtendedIconOptionsType => ({
     ...extendedIconOptions,
     web: enabledPlatforms.has('web'),
-    macOS: false,
+    macOS: enabledPlatforms.has('macOS'),
     tvOS: enabledPlatforms.has('tvOS'),
     androidTV: enabledPlatforms.has('androidTV'),
     playStore: enabledPlatforms.has('playStore'),
+    watchOS: enabledPlatforms.has('watchOS'),
   }), [extendedIconOptions, enabledPlatforms]);
 
   const handleGenerate = useCallback(async () => {
