@@ -350,7 +350,7 @@ export function PlatformPreview({
   );
 
   return (
-    <div className="h-full flex items-center justify-center p-8 bg-muted/30 rounded-xl">
+    <div className="h-full flex items-start justify-center p-8 pt-12 bg-muted/30 rounded-xl overflow-auto">
       {activeTab === 'android' && renderAndroidPreview()}
       {activeTab === 'ios' && renderIOSPreview()}
       {activeTab === 'web' && renderWebPreview()}
