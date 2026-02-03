@@ -10,6 +10,8 @@ import {
   Plus,
   Sparkles,
   X,
+  Laptop,
+  Watch,
 } from 'lucide-react';
 import {
   Popover,
@@ -24,7 +26,9 @@ export type PlatformTab =
   | 'androidTV' 
   | 'playStore' 
   | 'tvOS'
-  | 'splash';
+  | 'splash'
+  | 'macOS'
+  | 'watchOS';
 
 interface PlatformTabsProps {
   activeTab: PlatformTab;
@@ -41,6 +45,8 @@ const PLATFORM_TABS: { id: PlatformTab; label: string; icon: React.ComponentType
   { id: 'androidTV', label: 'Android TV', icon: MonitorPlay },
   { id: 'playStore', label: 'Play Store', icon: Store },
   { id: 'tvOS', label: 'tvOS Icon', icon: Tv },
+  { id: 'macOS', label: 'macOS Icon', icon: Laptop },
+  { id: 'watchOS', label: 'watchOS Icon', icon: Watch },
 ];
 
 export function PlatformTabs({ 
