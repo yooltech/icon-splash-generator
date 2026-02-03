@@ -28,7 +28,7 @@ import {
 export function AssetGenerator() {
   const [showHero, setShowHero] = useState(true);
   const [activeTab, setActiveTab] = useState<PlatformTab>('android');
-  const [enabledPlatforms, setEnabledPlatforms] = useState<Set<PlatformTab>>(new Set(['android']));
+  const [enabledPlatforms, setEnabledPlatforms] = useState<Set<PlatformTab>>(new Set(['android', 'ios', 'splash']));
   const [iconConfig, setIconConfig] = useState<IconConfig>(DEFAULT_ICON_CONFIG);
   const [androidStudioOptions, setAndroidStudioOptions] = useState<AndroidStudioOptionsType>(DEFAULT_ANDROID_STUDIO_OPTIONS);
   const [extendedIconOptions, setExtendedIconOptions] = useState<ExtendedIconOptionsType>(DEFAULT_EXTENDED_ICON_OPTIONS);
