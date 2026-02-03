@@ -4,15 +4,12 @@ import {
   Loader2, 
   Sparkles, 
   Download,
-  Image,
 } from 'lucide-react';
 import { HeroSection } from '@/components/HeroSection';
 import { SuccessModal } from '@/components/SuccessModal';
 import { Footer } from '@/components/Footer';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { PlatformTabs, type PlatformTab } from '@/components/PlatformTabs';
 import { PlatformSidebar } from '@/components/PlatformSidebar';
 import { PlatformPreview } from '@/components/PlatformPreview';
@@ -28,8 +25,6 @@ import {
   DEFAULT_ANDROID_STUDIO_OPTIONS,
   DEFAULT_EXTENDED_ICON_OPTIONS,
 } from '@/types/assets';
-
-const ICON_PLATFORMS: PlatformTab[] = ['android', 'ios', 'web', 'macOS', 'tvOS', 'androidTV', 'playStore', 'watchOS'];
 
 export function AssetGenerator() {
   const [showHero, setShowHero] = useState(true);
@@ -111,32 +106,9 @@ export function AssetGenerator() {
 
   // Check if any icon platform is enabled (not just splash)
   const hasIconPlatforms = useMemo(() => {
-    return ICON_PLATFORMS.some(p => enabledPlatforms.has(p));
+    const iconPlatforms: PlatformTab[] = ['android', 'ios', 'web', 'macOS', 'tvOS', 'androidTV', 'playStore', 'watchOS'];
+    return iconPlatforms.some(p => enabledPlatforms.has(p));
   }, [enabledPlatforms]);
-
-  // Toggle all icon platforms on/off
-  const handleToggleAllIcons = useCallback((enabled: boolean) => {
-    setEnabledPlatforms(prev => {
-      const next = new Set(prev);
-      if (enabled) {
-        // Enable android and ios by default
-        next.add('android');
-        next.add('ios');
-      } else {
-        // Remove all icon platforms
-        ICON_PLATFORMS.forEach(p => next.delete(p));
-        // Make sure splash is enabled if we're removing all icons
-        if (next.size === 0) {
-          next.add('splash');
-        }
-        // Switch to splash tab if current tab is an icon platform
-        if (ICON_PLATFORMS.includes(activeTab)) {
-          setActiveTab('splash');
-        }
-      }
-      return next;
-    });
-  }, [activeTab]);
 
   const handleGenerate = useCallback(async () => {
     setIsGenerating(true);
@@ -226,19 +198,7 @@ export function AssetGenerator() {
               <span className="text-gradient">Splash</span>Craft
             </h1>
           </button>
-          <div className="flex items-center gap-4">
-            {/* Include Icons Toggle */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border">
-              <Image className="w-4 h-4 text-muted-foreground" />
-              <Label htmlFor="include-icons" className="text-sm font-medium cursor-pointer">
-                Icons
-              </Label>
-              <Switch
-                id="include-icons"
-                checked={hasIconPlatforms}
-                onCheckedChange={handleToggleAllIcons}
-              />
-            </div>
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             <Button
               onClick={handleGenerate}
