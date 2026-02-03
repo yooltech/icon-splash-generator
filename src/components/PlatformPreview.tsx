@@ -298,20 +298,23 @@ export function PlatformPreview({
               : iconConfig.backgroundColor,
           }}
         >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <IconPreview config={iconConfig} size={100} />
-          </motion.div>
+          {/* Only show icon if splashShowIcon is true */}
+          {extendedOptions.splashShowIcon && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <IconPreview config={iconConfig} size={100} />
+            </motion.div>
+          )}
           
           {extendedOptions.splashShowName !== false && (
             <motion.h2
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-2xl font-bold mt-6 drop-shadow-lg"
+              className={`text-2xl font-bold drop-shadow-lg ${extendedOptions.splashShowIcon ? 'mt-6' : ''}`}
               style={{ color: extendedOptions.splashTextColor || '#FFFFFF' }}
             >
               {extendedOptions.splashAppName || 'My App'}

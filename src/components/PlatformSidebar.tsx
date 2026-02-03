@@ -475,22 +475,36 @@ export function PlatformSidebar({
     </div>
   );
 
-  // Splash Screen options
+  // Splash Screen options - simplified, no icon options needed
   const renderSplashOptions = () => (
     <div className="space-y-6">
-      {renderCommonIconOptions()}
+      {/* Background settings only - reuse from icon config */}
+      <BackgroundEditor
+        backgroundType={iconConfig.backgroundType}
+        backgroundColor={iconConfig.backgroundColor}
+        gradient={iconConfig.gradient}
+        mesh={iconConfig.mesh}
+        backgroundImage={iconConfig.backgroundImage}
+        texture={iconConfig.texture}
+        onBackgroundTypeChange={(backgroundType) => updateIconConfig({ backgroundType })}
+        onBackgroundColorChange={(backgroundColor) => updateIconConfig({ backgroundColor })}
+        onGradientChange={(gradient) => updateIconConfig({ gradient })}
+        onMeshChange={(mesh) => updateIconConfig({ mesh })}
+        onBackgroundImageChange={(backgroundImage) => updateIconConfig({ backgroundImage })}
+        onTextureChange={(texture) => updateIconConfig({ texture })}
+      />
       
       <div className="glass-card p-4 space-y-4">
         <h4 className="font-medium text-sm">Splash Screen Settings</h4>
         
-        <div className="space-y-2">
-          <Label htmlFor="splash-app-name" className="text-xs">App Name</Label>
-          <Input
-            id="splash-app-name"
-            value={extendedOptions.splashAppName || 'My App'}
-            onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashAppName: e.target.value })}
-            placeholder="My App"
-            className="h-8 text-sm"
+        <div className="flex items-center justify-between">
+          <Label htmlFor="splash-show-icon" className="text-sm">Show Icon</Label>
+          <Switch
+            id="splash-show-icon"
+            checked={extendedOptions.splashShowIcon ?? false}
+            onCheckedChange={(checked) => 
+              onExtendedOptionsChange({ ...extendedOptions, splashShowIcon: checked })
+            }
           />
         </div>
         
@@ -505,23 +519,38 @@ export function PlatformSidebar({
           />
         </div>
         
-        <div className="space-y-2">
-          <Label className="text-xs">Text Color</Label>
-          <div className="flex gap-2">
-            <input
-              type="color"
-              value={extendedOptions.splashTextColor || '#FFFFFF'}
-              onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashTextColor: e.target.value })}
-              className="w-8 h-8 rounded border border-border cursor-pointer"
-            />
-            <Input
-              value={extendedOptions.splashTextColor || '#FFFFFF'}
-              onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashTextColor: e.target.value })}
-              placeholder="#FFFFFF"
-              className="h-8 text-sm font-mono flex-1"
-            />
-          </div>
-        </div>
+        {extendedOptions.splashShowName !== false && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="splash-app-name" className="text-xs">App Name</Label>
+              <Input
+                id="splash-app-name"
+                value={extendedOptions.splashAppName || 'My App'}
+                onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashAppName: e.target.value })}
+                placeholder="My App"
+                className="h-8 text-sm"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-xs">Text Color</Label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={extendedOptions.splashTextColor || '#FFFFFF'}
+                  onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashTextColor: e.target.value })}
+                  className="w-8 h-8 rounded border border-border cursor-pointer"
+                />
+                <Input
+                  value={extendedOptions.splashTextColor || '#FFFFFF'}
+                  onChange={(e) => onExtendedOptionsChange({ ...extendedOptions, splashTextColor: e.target.value })}
+                  placeholder="#FFFFFF"
+                  className="h-8 text-sm font-mono flex-1"
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
       
       <div className="glass-card p-4 space-y-2">

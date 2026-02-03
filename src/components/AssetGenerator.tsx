@@ -90,19 +90,31 @@ export function AssetGenerator() {
   }), [extendedIconOptions, enabledPlatforms]);
 
   // Derive SplashConfig from iconConfig and extendedOptions
-  const splashConfig = useMemo((): SplashConfig => ({
-    contentType: iconConfig.sourceType === 'image' ? 'logo' : 'text',
-    logoImage: iconConfig.sourceType === 'image' ? iconConfig.sourceValue : null,
-    text: extendedIconOptions.splashAppName || 'My App',
-    textColor: extendedIconOptions.splashTextColor || '#FFFFFF',
-    textFont: 'Inter',
-    position: 'center',
-    scale: 'medium',
-    backgroundType: iconConfig.backgroundType === 'gradient' ? 'gradient' : 'color',
-    backgroundColor: iconConfig.backgroundColor,
-    gradient: iconConfig.gradient,
-    backgroundImage: null,
-  }), [iconConfig, extendedIconOptions]);
+  const splashConfig = useMemo((): SplashConfig => {
+    // Determine content type based on user settings
+    let contentType: 'logo' | 'text' | 'logo-text' = 'text';
+    if (extendedIconOptions.splashShowIcon && extendedIconOptions.splashShowName !== false) {
+      contentType = 'logo-text';
+    } else if (extendedIconOptions.splashShowIcon) {
+      contentType = 'logo';
+    } else {
+      contentType = 'text';
+    }
+
+    return {
+      contentType,
+      logoImage: extendedIconOptions.splashShowIcon && iconConfig.sourceType === 'image' ? iconConfig.sourceValue : null,
+      text: extendedIconOptions.splashAppName || 'My App',
+      textColor: extendedIconOptions.splashTextColor || '#FFFFFF',
+      textFont: 'Inter',
+      position: 'center',
+      scale: 'medium',
+      backgroundType: iconConfig.backgroundType === 'gradient' ? 'gradient' : 'color',
+      backgroundColor: iconConfig.backgroundColor,
+      gradient: iconConfig.gradient,
+      backgroundImage: null,
+    };
+  }, [iconConfig, extendedIconOptions]);
 
   // Check if any icon platform is enabled (not just splash)
   const hasIconPlatforms = useMemo(() => {
