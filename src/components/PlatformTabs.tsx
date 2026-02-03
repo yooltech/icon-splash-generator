@@ -120,52 +120,54 @@ export function PlatformTabs({
         );
       })}
 
-      {/* Add platform button */}
-      {disabledTabs.length > 0 && (
-        <Popover open={addMenuOpen} onOpenChange={setAddMenuOpen}>
-          <PopoverTrigger asChild>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="
-                flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed 
-                border-border bg-card hover:border-primary/50 hover:bg-primary/5 
-                transition-all min-w-[100px] min-h-[104px]
-              "
-            >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-secondary text-muted-foreground">
-                <Plus className="w-6 h-6" />
-              </div>
-            </motion.button>
-          </PopoverTrigger>
-          <PopoverContent className="w-56 p-2" align="start">
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground px-2 py-1">Add Platform</p>
-              {disabledTabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
+      {/* Add platform button - always show */}
+      <Popover open={addMenuOpen} onOpenChange={setAddMenuOpen}>
+        <PopoverTrigger asChild>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="
+              flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed 
+              border-border bg-card hover:border-primary/50 hover:bg-primary/5 
+              transition-all min-w-[100px] min-h-[104px]
+            "
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-secondary text-muted-foreground">
+              <Plus className="w-6 h-6" />
+            </div>
+          </motion.button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56 p-2" align="start">
+          <div className="space-y-1">
+            {PLATFORM_TABS.map((tab) => {
+              const isEnabled = enabledPlatforms.has(tab.id);
+              return (
+                <button
+                  key={tab.id}
+                  disabled={isEnabled}
+                  onClick={() => {
+                    if (!isEnabled) {
                       onTogglePlatform(tab.id);
                       setAddMenuOpen(false);
-                    }}
-                    className="
-                      w-full flex items-center gap-3 px-2 py-2 rounded-lg
-                      hover:bg-primary/10 transition-colors text-left
-                    "
-                  >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-secondary text-muted-foreground">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <span className="text-sm font-medium">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
+                    }
+                  }}
+                  className={`
+                    w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors text-left
+                    ${isEnabled 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : 'hover:bg-primary/10 cursor-pointer'
+                    }
+                  `}
+                >
+                  <span className={`text-sm ${isEnabled ? 'text-muted-foreground' : 'text-foreground'}`}>
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
