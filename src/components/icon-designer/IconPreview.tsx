@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 import type { IconConfig } from '@/types/assets';
@@ -11,8 +11,20 @@ interface IconPreviewProps {
 
 export function IconPreview({ config, size = 200, isDark = false }: IconPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
 
+  // Pre-load image when sourceValue changes
   useEffect(() => {
+    if (config.sourceType === 'image' && config.sourceValue.startsWith('data:')) {
+      const img = new Image();
+      img.onload = () => setLoadedImage(img);
+      img.src = config.sourceValue;
+    } else {
+      setLoadedImage(null);
+    }
+  }, [config.sourceType, config.sourceValue]);
+
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -32,13 +44,17 @@ export function IconPreview({ config, size = 200, isDark = false }: IconPreviewP
     applyShapeMask(ctx, config.shape, size);
 
     // Draw content
-    drawContent(ctx, config, size);
+    drawContent(ctx, config, size, loadedImage);
 
     // Draw badge if enabled
     if (config.hasBadge) {
       drawBadge(ctx, config.badgeColor, size);
     }
-  }, [config, size]);
+  }, [config, size, loadedImage]);
+
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
 
   const drawBackground = (ctx: CanvasRenderingContext2D, config: IconConfig, size: number) => {
     ctx.save();
@@ -161,7 +177,7 @@ export function IconPreview({ config, size = 200, isDark = false }: IconPreviewP
     ctx.globalCompositeOperation = 'source-over';
   };
 
-  const drawContent = (ctx: CanvasRenderingContext2D, config: IconConfig, size: number) => {
+  const drawContent = (ctx: CanvasRenderingContext2D, config: IconConfig, size: number, preloadedImage: HTMLImageElement | null) => {
     const padding = config.effect === 'padding' ? config.paddingPercent / 100 : 0;
     const contentSize = size * (1 - padding * 2);
     const offset = size * padding;
@@ -186,11 +202,8 @@ export function IconPreview({ config, size = 200, isDark = false }: IconPreviewP
         break;
 
       case 'image':
-        if (config.sourceValue.startsWith('data:')) {
-          const img = new Image();
-          img.src = config.sourceValue;
-          // For synchronous preview, we'd need to pre-load this
-          ctx.drawImage(img, 0, 0, contentSize, contentSize);
+        if (preloadedImage) {
+          ctx.drawImage(preloadedImage, 0, 0, contentSize, contentSize);
         }
         break;
 
