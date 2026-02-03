@@ -124,6 +124,7 @@ export interface ExtendedIconOptions {
   // Splash screen options
   splashAppName: string;
   splashShowName: boolean;
+  splashShowIcon: boolean;
   splashTextColor: string;
 }
 
@@ -148,6 +149,7 @@ export const DEFAULT_EXTENDED_ICON_OPTIONS: ExtendedIconOptions = {
   customSizes: [],
   splashAppName: 'My App',
   splashShowName: true,
+  splashShowIcon: false,
   splashTextColor: '#FFFFFF',
 };
 
