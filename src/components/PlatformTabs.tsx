@@ -103,11 +103,9 @@ export function PlatformTabs({
             
             {/* Remove button - only show on hover and if more than 1 platform */}
             {enabledPlatforms.size > 1 && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   onTogglePlatform(tab.id);
                 }}
@@ -115,12 +113,12 @@ export function PlatformTabs({
                   absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center
                   border-2 border-background shadow-md z-10
                   bg-muted text-muted-foreground hover:bg-destructive hover:text-destructive-foreground
-                  opacity-0 group-hover:opacity-100 transition-opacity
+                  opacity-0 group-hover:opacity-100 transition-all hover:scale-110
                 "
                 title="Remove from export"
               >
                 <X className="w-3 h-3" />
-              </motion.button>
+              </button>
             )}
           </motion.div>
         );
