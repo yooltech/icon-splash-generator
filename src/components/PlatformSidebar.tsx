@@ -312,6 +312,20 @@ export function PlatformSidebar({
               />
               <span className="text-sm">Generate adaptive icon XML</span>
             </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={androidStudioOptions.generateSplashXml}
+                onChange={(e) => 
+                  onAndroidStudioOptionsChange({ 
+                    ...androidStudioOptions, 
+                    generateSplashXml: e.target.checked 
+                  })
+                }
+                className="rounded"
+              />
+              <span className="text-sm">Generate launch_background.xml</span>
+            </label>
           </div>
         )}
       </div>
